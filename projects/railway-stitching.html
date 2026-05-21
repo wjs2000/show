@@ -3,92 +3,120 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>铁路无人机视频全景拼接 | 王俊松项目作品集</title>
+  <title>铁路无人机视频全景拼接 | 项目作品集</title>
   <meta name="description" content="铁路巡检视频全景拼接项目">
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="../index.html">王俊松 · 项目作品集</a>
-    <nav><a href="../index.html">作品集首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
+    <a class="brand" href="../index.html">项目作品集</a>
+    <nav><a href="../index.html">首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
   </header>
   <main>
-    
-    <section class="project-hero">
-      <div class="hero-copy">
-        <p class="kicker">工业巡检视频到全景底图</p>
+    <section class="immersive-hero hero-contain" style="--hero-image: url('../assets/images/railway/final-panorama.jpg')">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="kicker">无人机影像 · 图像拼接 · OpenCV 原型</p>
         <h1>铁路无人机视频全景拼接</h1>
-        <p class="lead">面向铁路巡检视频视野碎片化的问题，完成视频抽帧、特征匹配、几何配准、全局位姿链和全景输出，为后续部件识别和巡检勘察提供大视野底图。</p>
+        <p class="lead">面向铁路巡检视频视野碎片化的问题，完成视频抽帧、特征匹配、几何配准、全局位姿链和全景输出，形成可复盘的大视野铁路场景底图。</p>
         <div class="tag-row"><span>OpenCV</span><span>SIFT / RootSIFT</span><span>RANSAC</span><span>无人机影像</span></div>
       </div>
-      <div class="hero-visual"><img class="" src="../assets/images/railway/final-panorama.jpg" alt="铁路全景拼接结果" loading="lazy"></div>
     </section>
-    <section class="section "><div class="section-title"><h2>项目状态</h2></div><div class="metrics"><div class="metric"><span>输入帧</span><strong>58 张 1920x1080</strong></div><div class="metric"><span>匹配边日志</span><strong>227 条</strong></div><div class="metric"><span>位姿链</span><strong>58 帧</strong></div><div class="metric"><span>全景输出</span><strong>13567x11902</strong></div></div></section><section class="section "><div class="section-title"><h2>视频与拼接过程</h2></div>
-      <div class="media-grid two">
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>项目状态</h2>
         
-    <article class="media-card">
-      <img class="" src="../assets/media/railway/uav-preview.gif" alt="原始无人机视频片段" loading="lazy">
-      <div>
-        <h4>原始无人机视频片段</h4>
+      </div>
+      <div class="metrics"><div class="metric"><strong>58 张</strong><span>输入帧</span></div><div class="metric"><strong>227 条</strong><span>匹配边日志</span></div><div class="metric"><strong>58 帧</strong><span>位姿链</span></div><div class="metric"><strong>13,567x11,902</strong><span>全景输出</span></div></div>
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>视频与拼接过程</h2>
+        
+      </div>
+      
+      <div class="gallery">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/media/railway/uav-preview.gif" alt="原始无人机视频片段" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>原始无人机视频片段</h3>
         <p>连续航拍画面作为拼接输入。</p>
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/media/railway/panorama-build.gif" alt="全景逐步成图效果" loading="lazy">
-      <div>
-        <h4>全景逐步成图效果</h4>
-        <p>用逐步展开的方式展示全景结果的形成。</p>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/media/railway/panorama-build.gif" alt="全景逐步成图" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>全景逐步成图</h3>
+        <p>用逐步展开的方式展示铁路场景底图的形成过程。</p>
       </div>
     </article>
     
       </div>
-    </section><section class="section "><div class="section-title"><h2>关键帧与结果</h2></div>
-      <div class="media-grid">
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/railway/frame-01.jpg" alt="输入帧 01" loading="lazy">
-      <div>
-        <h4>输入帧 01</h4>
-        
-      </div>
-    </article>
     
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/railway/frame-29.jpg" alt="输入帧 29" loading="lazy">
-      <div>
-        <h4>输入帧 29</h4>
-        
-      </div>
-    </article>
-    
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/railway/frame-58.jpg" alt="输入帧 58" loading="lazy">
-      <div>
-        <h4>输入帧 58</h4>
-        
-      </div>
-    </article>
-    
-      </div>
-      <div class="wide-image" style="margin-top:14px"><img class="" src="../assets/images/railway/final-panorama.jpg" alt="全景输出" loading="lazy"></div>
-    </section><section class="section "><div class="section-title"><h2>技术路线</h2></div>
-      <div class="process">
-        <div><strong>1. 视频抽帧</strong><span>从无人机视频中筛选连续帧并整理为拼接序列。</span></div>
-        <div><strong>2. 特征匹配</strong><span>SIFT/RootSIFT 提取局部特征，KNN 生成候选匹配。</span></div>
-        <div><strong>3. 几何配准</strong><span>RANSAC 估计仿射关系，ECC 处理弱连接场景。</span></div>
-        <div><strong>4. 全景输出</strong><span>基于全局位姿链生成铁路场景大视野底图。</span></div>
-      </div>
-    </section><section class="section "><div class="section-title"><h2>成果说明</h2></div>
-      <div class="note">当前页面展示的是图像拼接与巡检底图生成能力，核心价值在于把碎片化视频帧转化为可观察、可复盘的大视野场景。后续可以继续接入部件标注、目标检测和地理定位信息，形成更完整的铁路视觉巡检链路。</div>
     </section>
-  </main>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>关键帧与全景结果</h2>
+        
+      </div>
+      
+      <div class="gallery three">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/railway/frame-01.jpg" alt="输入帧 01" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>输入帧 01</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/railway/frame-29.jpg" alt="输入帧 29" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>输入帧 29</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/railway/frame-58.jpg" alt="输入帧 58" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>输入帧 58</h3>
+        
+      </div>
+    </article>
+    
+      </div>
+      <div class="wide-media" style="margin-top:20px"><img src="../assets/images/railway/final-panorama.jpg" alt="全景输出" loading="lazy"></div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>技术路线</h2>
+        
+      </div>
+      
+      <div class="process">
+        <div><strong>视频抽帧</strong><span>从无人机视频中筛选连续帧并整理为拼接序列。</span></div>
+        <div><strong>特征匹配</strong><span>SIFT/RootSIFT 提取局部特征，KNN 生成候选匹配。</span></div>
+        <div><strong>几何配准</strong><span>RANSAC 估计仿射关系，处理弱连接和视角变化。</span></div>
+        <div><strong>全景输出</strong><span>基于全局位姿链生成铁路场景大视野底图。</span></div>
+      </div>
+    
+    </section>
+    </main>
   <footer class="site-footer">
-    <span>Portfolio for internship interviews</span>
-    <span>Computer Vision · Financial AI · RAG · Mini Programs</span>
+    <span>Computer Vision · Computational Imaging · Financial AI · RAG · Mini Programs</span>
   </footer>
   <script src="../assets/site.js"></script>
 </body>

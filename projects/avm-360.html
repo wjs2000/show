@@ -3,125 +3,239 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>360车载全景影像拼接 | 王俊松项目作品集</title>
+  <title>360车载全景影像拼接 | 项目作品集</title>
   <meta name="description" content="装载机四路鱼眼相机 BEV 拼接项目">
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="../index.html">王俊松 · 项目作品集</a>
-    <nav><a href="../index.html">作品集首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
+    <a class="brand" href="../index.html">项目作品集</a>
+    <nav><a href="../index.html">首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
   </header>
   <main>
-    
-    <section class="project-hero">
-      <div class="hero-copy">
-        <p class="kicker">工程车辆四路鱼眼相机 BEV 拼接</p>
+    <section class="immersive-hero hero-contain" style="--hero-image: url('../assets/images/avm/avm_raw_front.jpg')">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="kicker">工程车辆四路鱼眼相机 · BEV 环视拼接</p>
         <h1>360车载全景影像拼接</h1>
-        <p class="lead">基于前、后、左、右四路鱼眼相机图像完成去畸变、地面单应性变换、有效区域融合和上机展示，形成可复盘的装载机场景环视拼接结果。</p>
+        <p class="lead">基于前、后、左、右四路鱼眼相机图像，完成去畸变、地面单应性投影、区域融合、上机展示和低延迟处理升级。</p>
         <div class="tag-row"><span>OpenCV</span><span>Fisheye</span><span>Homography</span><span>BEV Fusion</span></div>
       </div>
-      <div class="hero-visual"><div class="auto-carousel " data-carousel><figure class="slide is-active"><img class="" src="../assets/images/avm/avm_demo_bev.jpg" alt="上机鸟瞰图" loading="lazy"><figcaption>上机鸟瞰图</figcaption></figure><figure class="slide "><img class="" src="../assets/images/avm/avm_demo_front.jpg" alt="前向相机上机画面" loading="lazy"><figcaption>前向相机上机画面</figcaption></figure><figure class="slide "><img class="" src="../assets/images/avm/avm_demo_left.jpg" alt="左侧相机上机画面" loading="lazy"><figcaption>左侧相机上机画面</figcaption></figure><figure class="slide "><img class="" src="../assets/images/avm/avm_demo_right.jpg" alt="右侧相机上机画面" loading="lazy"><figcaption>右侧相机上机画面</figcaption></figure><figure class="slide "><img class="" src="../assets/images/avm/avm_demo_back.jpg" alt="后向相机上机画面" loading="lazy"><figcaption>后向相机上机画面</figcaption></figure><div class="carousel-dots"><button aria-label="切换到第1张" class="is-active"></button><button aria-label="切换到第2张" class=""></button><button aria-label="切换到第3张" class=""></button><button aria-label="切换到第4张" class=""></button><button aria-label="切换到第5张" class=""></button></div></div></div>
     </section>
-    <section class="section "><div class="section-title"><h2>相关参数</h2></div><div class="metrics"><div class="metric"><span>输入相机</span><strong>front / left / right / back</strong></div><div class="metric"><span>标定点</span><strong>每路 8 个外角点</strong></div><div class="metric"><span>back 重投影误差</span><strong>平均 1.352px</strong></div><div class="metric"><span>输出画布</span><strong>1216x1436 / 1600x1800 / 2000x2300</strong></div></div></section><section class="section "><div class="section-title"><h2>上机演示图片</h2></div>
-      <div class="media-grid">
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>相关参数</h2>
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_demo_front.jpg" alt="前向视角" loading="lazy">
-      <div>
-        <h4>前向视角</h4>
+      </div>
+      <div class="metrics"><div class="metric"><strong>4 路</strong><span>输入相机</span></div><div class="metric"><strong>每路 8 个外角点</strong><span>标定点</span></div><div class="metric"><strong>1.352px</strong><span>back 重投影误差</span></div><div class="metric"><strong>95.9ms</strong><span>优化后处理均值</span></div></div>
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>输入图像</h2>
+        <p>四路鱼眼图像作为 BEV 拼接输入，页面采用等比缩放展示，避免裁掉有效信息。</p>
+      </div>
+      
+      <div class="gallery four">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_raw_front.jpg" alt="前向原始图像" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>前向原始图像</h3>
         
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_demo_left.jpg" alt="左侧视角" loading="lazy">
-      <div>
-        <h4>左侧视角</h4>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_raw_left.jpg" alt="左侧原始图像" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>左侧原始图像</h3>
         
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_demo_right.jpg" alt="右侧视角" loading="lazy">
-      <div>
-        <h4>右侧视角</h4>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_raw_right.jpg" alt="右侧原始图像" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>右侧原始图像</h3>
         
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_demo_back.jpg" alt="后向视角" loading="lazy">
-      <div>
-        <h4>后向视角</h4>
-        
-      </div>
-    </article>
-    
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_demo_bev.jpg" alt="鸟瞰展示" loading="lazy">
-      <div>
-        <h4>鸟瞰展示</h4>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_raw_back.jpg" alt="后向原始图像" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>后向原始图像</h3>
         
       </div>
     </article>
     
       </div>
-    </section><section class="section "><div class="section-title"><h2>BEV 拼接结果</h2></div>
-      <div class="media-grid two">
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>结果展示</h2>
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_baseline.jpg" alt="baseline 距离权重融合" loading="lazy">
-      <div>
-        <h4>baseline 距离权重融合</h4>
+      </div>
+      
+      <div class="gallery">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_baseline.jpg" alt="基础 BEV 融合结果" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>基础 BEV 融合结果</h3>
         
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_owned.jpg" alt="ownership-prior 区域融合" loading="lazy">
-      <div>
-        <h4>ownership-prior 区域融合</h4>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_owned.jpg" alt="ownership-prior 区域融合" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>ownership-prior 区域融合</h3>
         
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_safe.jpg" alt="extended safe 输出" loading="lazy">
-      <div>
-        <h4>extended safe 输出</h4>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_safe.jpg" alt="extended safe 输出" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>extended safe 输出</h3>
         
       </div>
     </article>
     
         
-    <article class="media-card">
-      <img class="" src="../assets/images/avm/avm_wide.jpg" alt="extended wide 输出" loading="lazy">
-      <div>
-        <h4>extended wide 输出</h4>
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_wide.jpg" alt="extended wide 输出" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>extended wide 输出</h3>
         
       </div>
     </article>
     
       </div>
-    </section><section class="section "><div class="section-title"><h2>算法流程</h2></div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>上机实测</h2>
+        
+      </div>
+      
+      <div class="gallery three">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_demo_front.jpg" alt="前向上机画面" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>前向上机画面</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_demo_left.jpg" alt="左侧上机画面" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>左侧上机画面</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_demo_right.jpg" alt="右侧上机画面" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>右侧上机画面</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_demo_back.jpg" alt="后向上机画面" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>后向上机画面</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_demo_bev.jpg" alt="上机鸟瞰输出" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>上机鸟瞰输出</h3>
+        
+      </div>
+    </article>
+    
+      </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>视频流低延迟升级</h2>
+        
+      </div>
+      
+      <div class="feature-split">
+        <div class="rich-copy">
+          <h3>从离线拼接走向视频流处理</h3>
+          <p>在原始拼接链路上补充四路 UDP 视频流输入与运行接口，并围绕 warp、bottom multiH、blend 和内存分配环节做处理耗时优化。</p>
+          <ul>
+            <li>原始处理均值约 1025.1ms，输出约 0.98 FPS。</li>
+            <li>优化后处理均值约 95.9ms，输出约 10.43 FPS。</li>
+            <li>四路端口接口按 front / left / right / bottom 分离，便于接入多摄像头视频流。</li>
+          </ul>
+        </div>
+        <div class="gallery">
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_latency_compare.jpg" alt="优化前后对比" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>优化前后对比</h3>
+        
+      </div>
+    </article>
+    
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/avm/avm_latency_breakdown.jpg" alt="处理耗时分解" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>处理耗时分解</h3>
+        
+      </div>
+    </article>
+    </div>
+      </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>算法流程</h2>
+        
+      </div>
+      
       <div class="process">
-        <div><strong>1. 相机输入</strong><span>四路鱼眼图像与标定板点位进入统一配置。</span></div>
-        <div><strong>2. 几何映射</strong><span>鱼眼去畸变后通过地面单应性投影到 BEV 坐标。</span></div>
-        <div><strong>3. 区域融合</strong><span>使用有效区域 mask、距离权重和 ownership-prior 降低重影。</span></div>
-        <div><strong>4. 展示输出</strong><span>生成多尺度 BEV 结果并结合上机画面完成展示。</span></div>
+        <div><strong>相机输入</strong><span>采集四路鱼眼图像并统一标定点配置。</span></div>
+        <div><strong>几何映射</strong><span>去畸变后通过地面单应性投影到 BEV 坐标系。</span></div>
+        <div><strong>区域融合</strong><span>结合有效区域 mask、距离权重与 ownership-prior 降低重影。</span></div>
+        <div><strong>展示输出</strong><span>生成多尺度 BEV 结果，并接入上机和视频流演示链路。</span></div>
       </div>
+    
     </section>
-  </main>
+    </main>
   <footer class="site-footer">
-    <span>Portfolio for internship interviews</span>
-    <span>Computer Vision · Financial AI · RAG · Mini Programs</span>
+    <span>Computer Vision · Computational Imaging · Financial AI · RAG · Mini Programs</span>
   </footer>
   <script src="../assets/site.js"></script>
 </body>

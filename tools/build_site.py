@@ -5,7 +5,6 @@ import csv
 import html
 import math
 import os
-import re
 import shutil
 from pathlib import Path
 from typing import Iterable
@@ -20,7 +19,6 @@ ASSETS = REPO / "assets"
 PROJECTS_DIR = REPO / "projects"
 
 SOURCE_ROOT = Path(r"G:\云南财经大学\工作实习\项目文档")
-DECISION_ROOT = Path(r"G:\云南财经大学\决策支持系统\量化系统v1")
 
 
 def ensure_clean() -> None:
@@ -55,25 +53,19 @@ def rel(path: Path, from_dir: Path | None = None) -> str:
     return path.relative_to(from_dir).as_posix()
 
 
-def find_file(path: str) -> Path:
-    p = Path(path)
-    if not p.exists():
-        raise FileNotFoundError(path)
-    return p
-
-
-def copy_image(src: Path, dest_rel: str, max_w: int = 1400, max_h: int = 900, quality: int = 86) -> Path:
+def copy_image(src: Path, dest_rel: str, max_w: int = 1600, max_h: int = 1000, quality: int = 88) -> Path:
+    if not src.exists():
+        raise FileNotFoundError(src)
     dest = slug_path(dest_rel)
     with Image.open(src) as im:
         im = ImageOps.exif_transpose(im)
         if im.mode not in ("RGB", "RGBA"):
             im = im.convert("RGB")
         im.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
-        if dest.suffix.lower() in [".jpg", ".jpeg", ".webp"]:
-            if im.mode == "RGBA":
-                bg = Image.new("RGB", im.size, "white")
-                bg.paste(im, mask=im.split()[-1])
-                im = bg
+        if dest.suffix.lower() in [".jpg", ".jpeg", ".webp"] and im.mode == "RGBA":
+            bg = Image.new("RGB", im.size, "white")
+            bg.paste(im, mask=im.split()[-1])
+            im = bg
         if dest.suffix.lower() == ".webp":
             im.save(dest, "WEBP", quality=quality, method=6)
         elif dest.suffix.lower() in [".jpg", ".jpeg"]:
@@ -84,19 +76,33 @@ def copy_image(src: Path, dest_rel: str, max_w: int = 1400, max_h: int = 900, qu
 
 
 def copy_static(src: Path, dest_rel: str) -> Path:
+    if not src.exists():
+        raise FileNotFoundError(src)
     dest = slug_path(dest_rel)
     shutil.copy2(src, dest)
     return dest
+
+
+def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    candidates = [
+        Path(r"C:\Windows\Fonts\msyhbd.ttc") if bold else Path(r"C:\Windows\Fonts\msyh.ttc"),
+        Path(r"C:\Windows\Fonts\simhei.ttf"),
+        Path(r"C:\Windows\Fonts\arial.ttf"),
+    ]
+    for item in candidates:
+        if item.exists():
+            return ImageFont.truetype(str(item), size)
+    return ImageFont.load_default()
 
 
 def make_video_gif(
     src: Path,
     dest_rel: str,
     start_sec: float = 0,
-    duration: float = 3.2,
-    fps_out: int = 8,
-    width: int = 420,
-    max_frames: int = 32,
+    duration: float = 3.0,
+    fps_out: int = 6,
+    width: int = 360,
+    max_frames: int = 18,
 ) -> Path:
     dest = slug_path(dest_rel)
     cap = cv2.VideoCapture(str(src))
@@ -117,11 +123,9 @@ def make_video_gif(
         if (idx - start_frame) % step == 0:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             h, w = frame.shape[:2]
-            new_w = width
-            new_h = max(1, int(h * new_w / w))
-            frame = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
-            im = Image.fromarray(frame)
-            frames.append(im.convert("P", palette=Image.Palette.ADAPTIVE, colors=128))
+            new_h = max(1, int(h * width / w))
+            frame = cv2.resize(frame, (width, new_h), interpolation=cv2.INTER_AREA)
+            frames.append(Image.fromarray(frame).convert("P", palette=Image.Palette.ADAPTIVE, colors=128))
         idx += 1
     cap.release()
     if not frames:
@@ -137,7 +141,7 @@ def make_video_gif(
     return dest
 
 
-def make_reveal_gif(src: Path, dest_rel: str, width: int = 680, frames_count: int = 30) -> Path:
+def make_reveal_gif(src: Path, dest_rel: str, width: int = 760, frames_count: int = 30) -> Path:
     dest = slug_path(dest_rel)
     with Image.open(src) as im:
         im = ImageOps.exif_transpose(im).convert("RGB")
@@ -145,22 +149,72 @@ def make_reveal_gif(src: Path, dest_rel: str, width: int = 680, frames_count: in
         height = max(1, int(im.height * ratio))
         im = im.resize((width, height), Image.Resampling.LANCZOS)
     frames: list[Image.Image] = []
-    bg = Image.new("RGB", im.size, (238, 241, 244))
-    draw = ImageDraw.Draw(bg)
-    step_lines = max(4, width // 16)
-    for x in range(0, width, step_lines):
-        draw.line([(x, 0), (x, height)], fill=(220, 225, 230))
+    bg = Image.new("RGB", im.size, (10, 13, 15))
+    grid = ImageDraw.Draw(bg)
+    for x in range(0, width, 48):
+        grid.line([(x, 0), (x, height)], fill=(28, 34, 38))
+    for y in range(0, height, 48):
+        grid.line([(0, y), (width, y)], fill=(28, 34, 38))
     for i in range(frames_count):
         t = (i + 1) / frames_count
         reveal_w = int(width * t)
         frame = bg.copy()
-        crop = im.crop((0, 0, reveal_w, height))
-        frame.paste(crop, (0, 0))
-        d = ImageDraw.Draw(frame)
-        d.line([(reveal_w, 0), (reveal_w, height)], fill=(32, 120, 160), width=3)
+        frame.paste(im.crop((0, 0, reveal_w, height)), (0, 0))
+        draw = ImageDraw.Draw(frame)
+        draw.line([(reveal_w, 0), (reveal_w, height)], fill=(57, 177, 188), width=3)
         frames.append(frame.convert("P", palette=Image.Palette.ADAPTIVE, colors=128))
-    frames.extend([frames[-1]] * 6)
+    frames.extend([frames[-1]] * 8)
     frames[0].save(dest, save_all=True, append_images=frames[1:], duration=80, loop=0, optimize=True)
+    return dest
+
+
+def make_media_strip(srcs: list[Path], dest_rel: str, labels: list[str], max_h: int = 560) -> Path:
+    dest = slug_path(dest_rel)
+    panels: list[Image.Image] = []
+    for src, label in zip(srcs, labels):
+        with Image.open(src) as im:
+            im = ImageOps.exif_transpose(im).convert("RGB")
+            im.thumbnail((520, max_h - 58), Image.Resampling.LANCZOS)
+            canvas = Image.new("RGB", (540, max_h), (246, 249, 251))
+            x = (canvas.width - im.width) // 2
+            y = 18
+            canvas.paste(im, (x, y))
+            draw = ImageDraw.Draw(canvas)
+            draw.text((22, max_h - 38), label, fill=(22, 32, 40), font=font(20, True))
+            panels.append(canvas)
+    gap = 22
+    out = Image.new("RGB", (len(panels) * 540 + (len(panels) - 1) * gap, max_h), (236, 242, 247))
+    x = 0
+    for panel in panels:
+        out.paste(panel, (x, 0))
+        x += 540 + gap
+    out.thumbnail((1800, 720), Image.Resampling.LANCZOS)
+    out.save(dest, "JPEG", quality=88, optimize=True, progressive=True)
+    return dest
+
+
+def make_miniapp_collage(srcs: list[Path], dest_rel: str) -> Path:
+    dest = slug_path(dest_rel)
+    thumbs = []
+    for src in srcs:
+        with Image.open(src) as im:
+            im = ImageOps.exif_transpose(im).convert("RGB")
+            im.thumbnail((300, 610), Image.Resampling.LANCZOS)
+            canvas = Image.new("RGB", (330, 650), (244, 248, 249))
+            x = (canvas.width - im.width) // 2
+            y = (canvas.height - im.height) // 2
+            canvas.paste(im, (x, y))
+            thumbs.append(canvas)
+    w = sum(im.width for im in thumbs) + 26 * (len(thumbs) - 1)
+    h = max(im.height for im in thumbs)
+    out = Image.new("RGB", (w, h), (223, 237, 239))
+    x = 0
+    for i, im in enumerate(thumbs):
+        y = 0 if i % 2 == 0 else 24
+        out.paste(im, (x, y))
+        x += im.width + 26
+    out.thumbnail((1400, 780), Image.Resampling.LANCZOS)
+    out.save(dest, "JPEG", quality=88, optimize=True, progressive=True)
     return dest
 
 
@@ -187,15 +241,15 @@ def draw_quant_charts(eval_csv: Path, top_csv: Path) -> tuple[Path, Path]:
     p3 = [float(r["precision_at_3"]) for r in eval_rows]
 
     chart1 = slug_path("assets/images/quant/model-evaluation-zoom.png")
-    fig, ax = plt.subplots(figsize=(7.2, 4.0), dpi=170)
+    fig, ax = plt.subplots(figsize=(7.6, 4.2), dpi=170)
     x = np.arange(len(models))
-    ax.bar(x - 0.18, auc, 0.34, label="Test AUC", color="#2b7a78")
-    ax.bar(x + 0.18, p3, 0.34, label="P@3", color="#b55d2a")
+    ax.bar(x - 0.18, auc, 0.34, label="Test AUC", color="#2f7a84")
+    ax.bar(x + 0.18, p3, 0.34, label="P@3", color="#c2772e")
     ax.set_xticks(x, models)
     ymin = max(0.48, min(auc + p3) - 0.02)
     ymax = min(0.62, max(auc + p3) + 0.03)
     ax.set_ylim(ymin, ymax)
-    ax.grid(axis="y", alpha=0.25)
+    ax.grid(axis="y", alpha=0.24)
     ax.legend(frameon=False)
     ax.set_title("Model Evaluation on Test Split")
     for xpos, value in zip(list(x - 0.18) + list(x + 0.18), auc + p3):
@@ -212,14 +266,15 @@ def draw_quant_charts(eval_csv: Path, top_csv: Path) -> tuple[Path, Path]:
     top_rows = sorted(top_rows, key=lambda r: int(float(r["rank_num"])))[:3]
     names = [r["etf_name"] for r in top_rows]
     probs = [float(r["pred_probability"]) for r in top_rows]
+
     chart2 = slug_path("assets/images/quant/latest-top3-zoom.png")
-    fig, ax = plt.subplots(figsize=(7.2, 4.0), dpi=170)
+    fig, ax = plt.subplots(figsize=(7.6, 4.2), dpi=170)
     ypos = np.arange(len(names))
-    ax.barh(ypos, probs, color=["#256d85", "#5c946e", "#c47f33"])
+    ax.barh(ypos, probs, color=["#246d7d", "#55936b", "#be7a2d"])
     ax.set_yticks(ypos, names)
     ax.invert_yaxis()
     ax.set_xlim(max(0.50, min(probs) - 0.025), min(0.62, max(probs) + 0.035))
-    ax.grid(axis="x", alpha=0.25)
+    ax.grid(axis="x", alpha=0.24)
     ax.set_title("Latest Logistic Top 3 Probability")
     for y, value in zip(ypos, probs):
         ax.text(value + 0.002, y, f"{value:.4f}", va="center", fontsize=9)
@@ -229,71 +284,228 @@ def draw_quant_charts(eval_csv: Path, top_csv: Path) -> tuple[Path, Path]:
     return chart1, chart2
 
 
-def make_miniapp_collage(srcs: list[Path], dest_rel: str) -> Path:
+def draw_blue_tech_background(dest_rel: str) -> Path:
     dest = slug_path(dest_rel)
-    thumbs = []
-    for src in srcs:
-        with Image.open(src) as im:
-            im = ImageOps.exif_transpose(im).convert("RGB")
-            im.thumbnail((260, 520), Image.Resampling.LANCZOS)
-            canvas = Image.new("RGB", (280, 560), (246, 247, 249))
-            x = (canvas.width - im.width) // 2
-            y = (canvas.height - im.height) // 2
-            canvas.paste(im, (x, y))
-            thumbs.append(canvas)
-    w = 280 * len(thumbs)
-    h = 560
-    out = Image.new("RGB", (w, h), (235, 238, 241))
-    for i, im in enumerate(thumbs):
-        out.paste(im, (i * 280, 0))
-    out.thumbnail((1200, 720), Image.Resampling.LANCZOS)
-    out.save(dest, "JPEG", quality=88, optimize=True, progressive=True)
+    w, h = 1800, 980
+    arr = np.zeros((h, w, 3), dtype=np.uint8)
+    for y in range(h):
+        for x in range(w):
+            t = x / w
+            u = y / h
+            arr[y, x] = [
+                int(16 + 18 * t + 10 * u),
+                int(62 + 52 * t + 24 * u),
+                int(110 + 86 * (1 - u) + 28 * t),
+            ]
+    im = Image.fromarray(arr, "RGB")
+    draw = ImageDraw.Draw(im, "RGBA")
+    for x in range(80, w, 140):
+        draw.line([(x, 0), (x - 360, h)], fill=(180, 230, 255, 24), width=1)
+    for y in range(80, h, 120):
+        draw.line([(0, y), (w, y + 120)], fill=(180, 230, 255, 15), width=1)
+    for cx, cy, r in [(1380, 270, 210), (1170, 640, 160), (1500, 700, 120)]:
+        draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(175, 229, 255, 46), width=3)
+    for i in range(9):
+        x = 220 + i * 145
+        y = 680 - int(50 * math.sin(i * 0.7))
+        draw.ellipse((x - 7, y - 7, x + 7, y + 7), fill=(197, 245, 255, 120))
+        if i:
+            px = 220 + (i - 1) * 145
+            py = 680 - int(50 * math.sin((i - 1) * 0.7))
+            draw.line([(px, py), (x, y)], fill=(197, 245, 255, 62), width=3)
+    im.save(dest, "JPEG", quality=88, optimize=True, progressive=True)
+    return dest
+
+
+def draw_quant_background(dest_rel: str) -> Path:
+    dest = slug_path(dest_rel)
+    w, h = 1800, 980
+    im = Image.new("RGB", (w, h), (9, 18, 23))
+    draw = ImageDraw.Draw(im, "RGBA")
+    for x in range(0, w, 90):
+        draw.line([(x, 0), (x, h)], fill=(230, 246, 245, 18), width=1)
+    for y in range(70, h, 85):
+        draw.line([(0, y), (w, y)], fill=(230, 246, 245, 14), width=1)
+    rng = np.random.default_rng(42)
+    price = 510
+    x = 760
+    for i in range(38):
+        open_p = price + int(rng.normal(0, 28))
+        close_p = open_p + int(rng.normal(0, 42))
+        high = max(open_p, close_p) + int(rng.uniform(16, 58))
+        low = min(open_p, close_p) - int(rng.uniform(16, 58))
+        color = (230, 82, 82, 190) if close_p >= open_p else (43, 192, 128, 190)
+        y_high = h - high
+        y_low = h - low
+        y_open = h - open_p
+        y_close = h - close_p
+        draw.line([(x, y_high), (x, y_low)], fill=color, width=3)
+        draw.rounded_rectangle((x - 14, min(y_open, y_close), x + 14, max(y_open, y_close)), radius=3, fill=color)
+        price = close_p
+        x += 28
+    points = []
+    for i in range(34):
+        points.append((760 + i * 32, 500 - 85 * math.sin(i / 4.0) + rng.normal(0, 18)))
+    draw.line(points, fill=(255, 196, 82, 150), width=4)
+    draw.rectangle((0, 0, w, h), fill=(0, 0, 0, 18))
+    im.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
+    return dest
+
+
+def draw_logistics_background(dest_rel: str) -> Path:
+    dest = slug_path(dest_rel)
+    w, h = 1800, 980
+    im = Image.new("RGB", (w, h), (16, 38, 45))
+    draw = ImageDraw.Draw(im, "RGBA")
+    for y in range(h):
+        alpha = int(120 * y / h)
+        draw.line([(0, y), (w, y)], fill=(24, 82, 87, alpha), width=1)
+    nodes = [(980, 250), (1250, 210), (1460, 350), (1350, 560), (1060, 660), (840, 470), (1560, 680)]
+    for i, a in enumerate(nodes):
+        for b in nodes[i + 1 :]:
+            if math.dist(a, b) < 470:
+                draw.line([a, b], fill=(138, 224, 207, 42), width=2)
+    for idx, (x, y) in enumerate(nodes):
+        r = 18 if idx != 3 else 28
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=(105, 220, 190, 155), outline=(230, 255, 248, 135), width=2)
+    for x, y, ww, hh in [(1080, 785, 150, 80), (1260, 760, 210, 110), (1510, 785, 130, 70)]:
+        draw.rounded_rectangle((x, y, x + ww, y + hh), radius=8, fill=(232, 197, 98, 115), outline=(255, 235, 150, 120), width=2)
+        draw.line([(x + 18, y + 18), (x + ww - 18, y + hh - 18)], fill=(255, 235, 150, 60), width=2)
+    im.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
+    return dest
+
+
+def draw_miniapp_background(dest_rel: str) -> Path:
+    dest = slug_path(dest_rel)
+    w, h = 1800, 980
+    im = Image.new("RGB", (w, h), (230, 244, 241))
+    draw = ImageDraw.Draw(im, "RGBA")
+    draw.rounded_rectangle((860, 120, 1650, 790), radius=24, fill=(18, 31, 38, 220))
+    draw.rounded_rectangle((900, 170, 1260, 745), radius=16, fill=(247, 250, 250, 245))
+    draw.rounded_rectangle((1290, 170, 1610, 745), radius=16, fill=(33, 47, 56, 245))
+    for i, color in enumerate([(238, 86, 86), (244, 190, 77), (73, 190, 120)]):
+        x = 895 + i * 20
+        draw.ellipse((x, 138, x + 10, 148), fill=color)
+    for i in range(10):
+        y = 210 + i * 46
+        draw.rounded_rectangle((925, y, 1228, y + 20), radius=4, fill=(37, 159, 112, 50))
+        draw.rounded_rectangle((1320, y, 1570 - i * 9, y + 18), radius=4, fill=(132, 226, 183, 72))
+    for x, y, scale in [(1040, 480, 1.0), (760, 560, 0.82), (1450, 520, 0.88)]:
+        ww, hh = int(185 * scale), int(360 * scale)
+        draw.rounded_rectangle((x, y, x + ww, y + hh), radius=int(32 * scale), fill=(255, 255, 255, 245), outline=(20, 42, 48, 80), width=3)
+        draw.rounded_rectangle((x + 18, y + 48, x + ww - 18, y + hh - 28), radius=10, fill=(236, 248, 246, 255))
+        draw.rounded_rectangle((x + 42, y + 82, x + ww - 42, y + 124), radius=10, fill=(37, 159, 112, 180))
+        draw.rounded_rectangle((x + 42, y + 145, x + ww - 42, y + 174), radius=8, fill=(42, 67, 79, 40))
+        draw.rounded_rectangle((x + 42, y + 190, x + ww - 42, y + 218), radius=8, fill=(42, 67, 79, 30))
+    im.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
     return dest
 
 
 def media_tag(src: str, alt: str = "", cls: str = "", caption: str | None = None, poster: str | None = None) -> str:
     ext = Path(src).suffix.lower()
+    cls_attr = f' class="{esc(cls)}"' if cls else ""
     if ext == ".mp4":
         poster_attr = f' poster="{esc(poster)}"' if poster else ""
-        body = f'<video class="{cls}" controls muted playsinline preload="metadata"{poster_attr}><source src="{esc(src)}" type="video/mp4"></video>'
+        body = f'<video{cls_attr} controls muted playsinline preload="metadata"{poster_attr}><source src="{esc(src)}" type="video/mp4"></video>'
     else:
-        body = f'<img class="{cls}" src="{esc(src)}" alt="{esc(alt)}" loading="lazy">'
+        body = f'<img{cls_attr} src="{esc(src)}" alt="{esc(alt)}" loading="lazy">'
     if caption:
         return f'<figure>{body}<figcaption>{esc(caption)}</figcaption></figure>'
     return body
 
 
-def image_card(src: str, title: str, desc: str = "") -> str:
+def tags_html(tags: list[str]) -> str:
+    return "".join(f"<span>{esc(tag)}</span>" for tag in tags)
+
+
+def metric_cards(metrics: Iterable[tuple[str, str]]) -> str:
+    return '<div class="metrics">' + "".join(
+        f'<div class="metric"><strong>{esc(v)}</strong><span>{esc(k)}</span></div>' for k, v in metrics
+    ) + "</div>"
+
+
+def picture_panel(src: str, title: str, desc: str = "", cls: str = "") -> str:
     desc_html = f"<p>{esc(desc)}</p>" if desc else ""
     return f"""
-    <article class="media-card">
-      {media_tag(src, title)}
-      <div>
-        <h4>{esc(title)}</h4>
+    <article class="picture-panel {esc(cls)}">
+      <div class="picture">{media_tag(src, title)}</div>
+      <div class="picture-copy">
+        <h3>{esc(title)}</h3>
         {desc_html}
       </div>
     </article>
     """
 
 
-def metric_cards(metrics: Iterable[tuple[str, str]]) -> str:
-    return '<div class="metrics">' + "".join(
-        f'<div class="metric"><span>{esc(k)}</span><strong>{esc(v)}</strong></div>' for k, v in metrics
-    ) + "</div>"
+def text_panel(title: str, desc: str) -> str:
+    return f'<article class="text-panel"><h3>{esc(title)}</h3><p>{esc(desc)}</p></article>'
 
 
-def carousel(images: list[tuple[str, str]], extra_class: str = "") -> str:
-    slides = "".join(
-        f'<figure class="slide {"is-active" if i == 0 else ""}">{media_tag(src, alt)}<figcaption>{esc(alt)}</figcaption></figure>'
-        for i, (src, alt) in enumerate(images)
+def immersive_hero(
+    title: str,
+    kicker: str,
+    desc: str,
+    image_src: str,
+    tags: list[str],
+    *,
+    contain: bool = False,
+    tone: str = "",
+) -> str:
+    contain_cls = " hero-contain" if contain else ""
+    tone_cls = f" {tone}" if tone else ""
+    return f"""
+    <section class="immersive-hero{contain_cls}{tone_cls}" style="--hero-image: url('{esc(image_src)}')">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="kicker">{esc(kicker)}</p>
+        <h1>{esc(title)}</h1>
+        <p class="lead">{esc(desc)}</p>
+        <div class="tag-row">{tags_html(tags)}</div>
+      </div>
+    </section>
+    """
+
+
+def home_hero(slides: list[str]) -> str:
+    slide_html = "".join(
+        f'<figure class="hero-slide {"is-active" if i == 0 else ""}"><img src="{esc(src)}" alt="" loading="{"eager" if i == 0 else "lazy"}"></figure>'
+        for i, src in enumerate(slides)
     )
-    dots = "".join(f'<button aria-label="切换到第{i+1}张" class="{"is-active" if i == 0 else ""}"></button>' for i in range(len(images)))
-    return f'<div class="auto-carousel {extra_class}" data-carousel>{slides}<div class="carousel-dots">{dots}</div></div>'
+    dots = "".join(f'<button class="{"is-active" if i == 0 else ""}" aria-label="切换首屏图 {i + 1}"></button>' for i in range(len(slides)))
+    return f"""
+    <section class="immersive-hero home-immersive" data-hero-carousel>
+      <div class="hero-slides">{slide_html}</div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="kicker">Portfolio Overview</p>
+        <h1>项目作品集</h1>
+        <p class="lead">本项目集为计算机视觉、计算成像、金融智能、RAG 应用和微信小程序方向的代表项目。</p>
+        <div class="tag-row">
+          <span>Computer Vision</span><span>Computational Imaging</span><span>Financial AI</span><span>RAG / Agent</span><span>Mini Program</span>
+        </div>
+      </div>
+      <div class="hero-dots">{dots}</div>
+    </section>
+    """
+
+
+def section(title: str, content: str, cls: str = "", subtitle: str = "") -> str:
+    sub = f"<p>{esc(subtitle)}</p>" if subtitle else ""
+    return f"""
+    <section class="section {esc(cls)}">
+      <div class="section-heading">
+        <h2>{esc(title)}</h2>
+        {sub}
+      </div>
+      {content}
+    </section>
+    """
 
 
 def page_shell(title: str, subtitle: str, body: str, active: str = "") -> str:
     nav_items = [
-        ("../index.html" if active else "index.html", "作品集首页"),
+        ("../index.html" if active else "index.html", "首页"),
         ("avm-360.html", "360环视"),
         ("acaf-finance.html", "AFAC金融"),
         ("ai-fitness.html", "AI健身"),
@@ -311,45 +523,23 @@ def page_shell(title: str, subtitle: str, body: str, active: str = "") -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{esc(title)} | 王俊松项目作品集</title>
+  <title>{esc(title)} | 项目作品集</title>
   <meta name="description" content="{esc(subtitle)}">
   <link rel="stylesheet" href="{prefix}assets/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="{prefix}index.html">王俊松 · 项目作品集</a>
+    <a class="brand" href="{prefix}index.html">项目作品集</a>
     <nav>{nav}</nav>
   </header>
-  <main>
-    {body}
-  </main>
+  <main>{body}</main>
   <footer class="site-footer">
-    <span>Portfolio for internship interviews</span>
-    <span>Computer Vision · Financial AI · RAG · Mini Programs</span>
+    <span>Computer Vision · Computational Imaging · Financial AI · RAG · Mini Programs</span>
   </footer>
   <script src="{prefix}assets/site.js"></script>
 </body>
 </html>
 """
-
-
-def hero(title: str, kicker: str, desc: str, visual_html: str, tags: list[str]) -> str:
-    tags_html = "".join(f"<span>{esc(t)}</span>" for t in tags)
-    return f"""
-    <section class="project-hero">
-      <div class="hero-copy">
-        <p class="kicker">{esc(kicker)}</p>
-        <h1>{esc(title)}</h1>
-        <p class="lead">{esc(desc)}</p>
-        <div class="tag-row">{tags_html}</div>
-      </div>
-      <div class="hero-visual">{visual_html}</div>
-    </section>
-    """
-
-
-def section(title: str, content: str, cls: str = "") -> str:
-    return f'<section class="section {cls}"><div class="section-title"><h2>{esc(title)}</h2></div>{content}</section>'
 
 
 def write_assets() -> dict[str, str]:
@@ -359,20 +549,32 @@ def write_assets() -> dict[str, str]:
     avm_demo = avm_base / "素材展示" / "上机演示图片"
     avm_show = avm_base / "showcase_materials" / "resume_zip_showcase" / "images"
     for name, key in [
+        ("01_front_raw.png", "avm_raw_front"),
+        ("02_left_raw.png", "avm_raw_left"),
+        ("03_right_raw.png", "avm_raw_right"),
+        ("04_back_raw.png", "avm_raw_back"),
+        ("05_baseline_bev.png", "avm_baseline"),
+        ("06_owned_regions_best.png", "avm_owned"),
+        ("07_extended_safe.png", "avm_safe"),
+        ("08_extended_wide.png", "avm_wide"),
+    ]:
+        paths[key] = rel(copy_image(avm_show / name, f"assets/images/avm/{key}.jpg", 1500, 980))
+    for name, key in [
         ("上机前.jpg", "avm_demo_front"),
         ("上机右.jpg", "avm_demo_right"),
         ("上机后.jpg", "avm_demo_back"),
         ("上机左.jpg", "avm_demo_left"),
         ("上机鸟瞰图.jpg", "avm_demo_bev"),
     ]:
-        paths[key] = rel(copy_image(avm_demo / name, f"assets/images/avm/{key}.jpg", 1200, 780))
+        paths[key] = rel(copy_image(avm_demo / name, f"assets/images/avm/{key}.jpg", 1400, 900))
+    avm_out = avm_base / "ZhuanFa" / "ZhuanFa" / "suanfa" / "04_outputs"
     for name, key in [
-        ("05_baseline_bev.png", "avm_baseline"),
-        ("06_owned_regions_best.png", "avm_owned"),
-        ("07_extended_safe.png", "avm_safe"),
-        ("08_extended_wide.png", "avm_wide"),
+        ("formal_compare_before_after.png", "avm_latency_compare"),
+        ("debug_process_time_breakdown.png", "avm_latency_breakdown"),
+        ("formal_roi_optimized_output.png", "avm_roi_output"),
     ]:
-        paths[key] = rel(copy_image(avm_show / name, f"assets/images/avm/{key}.jpg", 1300, 900))
+        if (avm_out / name).exists():
+            paths[key] = rel(copy_image(avm_out / name, f"assets/images/avm/{key}.jpg", 1300, 900))
 
     acaf_img = SOURCE_ROOT / "ACAF2025金融智能创新大赛" / "portfolio_pack" / "assets" / "github_pages_materials" / "images"
     for name, key in [
@@ -381,7 +583,7 @@ def write_assets() -> dict[str, str]:
         ("奖金奖杯.jpg", "acaf_trophy"),
         ("证书.jpg", "acaf_certificate"),
     ]:
-        paths[key] = rel(copy_image(acaf_img / name, f"assets/images/acaf/{key}.jpg", 1200, 760))
+        paths[key] = rel(copy_image(acaf_img / name, f"assets/images/acaf/{key}.jpg", 1500, 980))
     acaf_charts = SOURCE_ROOT / "ACAF2025金融智能创新大赛" / "portfolio_pack" / "assets" / "charts"
     for name, key in [
         ("prediction_7day_aggregate.png", "acaf_pred"),
@@ -389,40 +591,55 @@ def write_assets() -> dict[str, str]:
         ("training_monthly_actuals.png", "acaf_monthly"),
         ("feature_correlation_snapshot.png", "acaf_corr"),
     ]:
-        paths[key] = rel(copy_image(acaf_charts / name, f"assets/images/acaf/{key}.png", 1100, 760))
+        paths[key] = rel(copy_image(acaf_charts / name, f"assets/images/acaf/{key}.png", 1300, 880))
     paths["acaf_arch"] = rel(copy_static(acaf_charts / "architecture_dataflow.svg", "assets/images/acaf/architecture.svg"))
 
     fitness = SOURCE_ROOT / "AI健身项目" / "portfolio_pack" / "素材包"
-    paths["fitness_home"] = rel(copy_image(fitness / "首页图" / "首页图.png", "assets/images/fitness/home.jpg", 1200, 760))
     for name, key in [
         ("深蹲-展示.png", "fitness_squat"),
         ("俯卧撑-展示.png", "fitness_pushup"),
         ("引体向上-展示.png", "fitness_pullup"),
         ("仰卧起坐-展示.png", "fitness_situp"),
     ]:
-        paths[key] = rel(copy_image(fitness / "截图" / name, f"assets/images/fitness/{key}.jpg", 760, 980))
-    paths["fitness_gif_squat"] = rel(make_video_gif(fitness / "视频" / "out-深蹲-左侧面.mp4", "assets/media/fitness/squat-demo.gif", start_sec=1.0, duration=2.6, fps_out=6, width=360, max_frames=18))
-    paths["fitness_gif_pushup"] = rel(make_video_gif(fitness / "视频" / "out-宽距俯卧撑-正面.mp4", "assets/media/fitness/pushup-demo.gif", start_sec=1.0, duration=2.6, fps_out=6, width=360, max_frames=18))
+        paths[key] = rel(copy_image(fitness / "截图" / name, f"assets/images/fitness/{key}.jpg", 920, 1080))
+    paths["fitness_strip"] = rel(make_media_strip(
+        [fitness / "截图" / n for n in ["深蹲-展示.png", "俯卧撑-展示.png", "引体向上-展示.png", "仰卧起坐-展示.png"]],
+        "assets/images/fitness/fitness-strip.jpg",
+        ["深蹲", "俯卧撑", "引体向上", "仰卧起坐"],
+    ))
+    paths["fitness_bg"] = rel(draw_blue_tech_background("assets/images/fitness/blue-tech-hero.jpg"))
+    for video_name, key in [
+        ("out-深蹲-左侧面.mp4", "fitness_gif_squat"),
+        ("out-宽距俯卧撑-正面.mp4", "fitness_gif_pushup"),
+        ("引体向上-背面.mp4", "fitness_gif_pullup"),
+        ("out-仰卧起坐-右侧面.mp4", "fitness_gif_situp"),
+    ]:
+        paths[key] = rel(make_video_gif(fitness / "视频" / video_name, f"assets/media/fitness/{key}.gif", start_sec=1.0, duration=2.8, fps_out=6, width=340, max_frames=18))
 
     quant_pkg = SOURCE_ROOT / "量化系统正式版V1" / "portfolio_pack"
     quant_assets = quant_pkg / "素材包"
-    paths["quant_latest"] = rel(copy_image(quant_assets / "最新预测.png", "assets/images/quant/latest-prediction.jpg", 1200, 760))
-    paths["quant_sim"] = rel(copy_image(quant_assets / "真实模拟.png", "assets/images/quant/real-simulation.jpg", 1200, 760))
+    paths["quant_latest"] = rel(copy_image(quant_assets / "最新预测.png", "assets/images/quant/latest-prediction.jpg", 1400, 900))
+    paths["quant_sim"] = rel(copy_image(quant_assets / "真实模拟.png", "assets/images/quant/real-simulation.jpg", 1400, 900))
+    quant_chart_dir = quant_pkg / "assets" / "charts"
+    paths["quant_old_top3"] = rel(copy_image(quant_chart_dir / "latest_prediction_top3.png", "assets/images/quant/latest-prediction-top3-source.png", 1300, 900))
+    paths["quant_old_auc"] = rel(copy_image(quant_chart_dir / "test_auc_by_model.png", "assets/images/quant/test-auc-source.png", 1300, 900))
     eval_chart, top_chart = draw_quant_charts(
         quant_pkg / "assets" / "data" / "latest_model_evaluation.csv",
         quant_pkg / "assets" / "data" / "latest_model_top3.csv",
     )
     paths["quant_eval"] = rel(eval_chart)
     paths["quant_top3"] = rel(top_chart)
+    paths["quant_bg"] = rel(draw_quant_background("assets/images/quant/candlestick-hero.jpg"))
 
     rail = SOURCE_ROOT / "铁路部件拼接项目"
     rail_common = rail / "portfolio_pack" / "common_assets"
-    paths["rail_final"] = rel(copy_image(rail_common / "ours_panorama_preview.jpg", "assets/images/railway/final-panorama.jpg", 1400, 780))
-    paths["rail_frame1"] = rel(copy_image(rail_common / "frame_01.jpg", "assets/images/railway/frame-01.jpg", 900, 620))
-    paths["rail_frame29"] = rel(copy_image(rail_common / "frame_29.jpg", "assets/images/railway/frame-29.jpg", 900, 620))
-    paths["rail_frame58"] = rel(copy_image(rail_common / "frame_58.jpg", "assets/images/railway/frame-58.jpg", 900, 620))
-    paths["rail_video_gif"] = rel(make_video_gif(rail / "铁路部件识别项目（视频文件转图像拼接）" / "展示资料" / "无人机视频.mp4", "assets/media/railway/uav-preview.gif", start_sec=2.0, duration=2.6, fps_out=6, width=460, max_frames=18))
-    paths["rail_reveal"] = rel(make_reveal_gif(rail_common / "ours_panorama_preview.jpg", "assets/media/railway/panorama-build.gif", width=720))
+    rail_show = rail / "铁路部件识别项目（视频文件转图像拼接）" / "展示资料"
+    paths["rail_final"] = rel(copy_image(rail_show / "拼接全景图.jpg", "assets/images/railway/final-panorama.jpg", 1900, 1200))
+    paths["rail_frame1"] = rel(copy_image(rail_common / "frame_01.jpg", "assets/images/railway/frame-01.jpg", 1000, 700))
+    paths["rail_frame29"] = rel(copy_image(rail_common / "frame_29.jpg", "assets/images/railway/frame-29.jpg", 1000, 700))
+    paths["rail_frame58"] = rel(copy_image(rail_common / "frame_58.jpg", "assets/images/railway/frame-58.jpg", 1000, 700))
+    paths["rail_video_gif"] = rel(make_video_gif(rail_show / "无人机视频.mp4", "assets/media/railway/uav-preview.gif", start_sec=2.0, duration=2.8, fps_out=6, width=520, max_frames=18))
+    paths["rail_reveal"] = rel(make_reveal_gif(rail_show / "拼接全景图.jpg", "assets/media/railway/panorama-build.gif", width=820))
 
     logistics = SOURCE_ROOT / "物流大数据垂直大模型" / "portfolio_pack" / "web_showcase_assets" / "assets"
     for name, key in [
@@ -431,7 +648,8 @@ def write_assets() -> dict[str, str]:
         ("route_optimization_demo.png", "log_route"),
         ("rag_skill_trace.png", "log_rag"),
     ]:
-        paths[key] = rel(copy_image(logistics / name, f"assets/images/logistics/{key}.jpg", 1200, 760))
+        paths[key] = rel(copy_image(logistics / name, f"assets/images/logistics/{key}.jpg", 1400, 900))
+    paths["log_bg"] = rel(draw_logistics_background("assets/images/logistics/logistics-hero.jpg"))
 
     campus = SOURCE_ROOT / "校园网约车项目" / "portfolio_pack" / "素材包"
     shuy = SOURCE_ROOT / "舒腰健脊App开发" / "portfolio_pack" / "素材包"
@@ -442,6 +660,7 @@ def write_assets() -> dict[str, str]:
         mountain / "截图" / "首页.jpg",
     ]
     paths["mini_collage"] = rel(make_miniapp_collage(mini_srcs, "assets/images/miniapps/miniapp-collage.jpg"))
+    paths["mini_bg"] = rel(draw_miniapp_background("assets/images/miniapps/devtools-hero.jpg"))
     mini_groups = {
         "campus": [campus / "截图" / p for p in [
             "01-首页_拼车调度台.png", "03-发起拼单_费用预估.png", "04-订单详情_成团进度.png", "05-我的行程_待出行.png"
@@ -454,7 +673,7 @@ def write_assets() -> dict[str, str]:
     for group, srcs in mini_groups.items():
         for idx, src in enumerate(srcs, 1):
             key = f"mini_{group}_{idx}"
-            paths[key] = rel(copy_image(src, f"assets/images/miniapps/{key}.jpg", 600, 960))
+            paths[key] = rel(copy_image(src, f"assets/images/miniapps/{key}.jpg", 720, 1120))
     for src, key in [
         (campus / "视频" / "校园网约车.mp4", "mini_campus_video"),
         (shuy / "视频" / "舒腰健脊.mp4", "mini_shuy_video"),
@@ -468,16 +687,15 @@ def write_assets() -> dict[str, str]:
 def write_css_js() -> None:
     css = r"""
 :root {
-  --ink: #172027;
-  --muted: #5f6b73;
-  --line: #dde4e8;
+  --ink: #152027;
+  --muted: #60707b;
+  --line: #dce5ea;
+  --paper: #f5f7f8;
   --panel: #ffffff;
-  --soft: #f5f7f8;
-  --teal: #1f7a78;
-  --rust: #b25c2f;
-  --gold: #b48a2c;
-  --green: #4f7d4e;
-  --shadow: 0 12px 28px rgba(21, 33, 40, .09);
+  --blue: #135577;
+  --teal: #1c827d;
+  --gold: #bd8d28;
+  --shadow: 0 18px 42px rgba(15, 28, 35, .10);
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -486,560 +704,850 @@ body {
   color: var(--ink);
   background: #fbfcfc;
   font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
-  line-height: 1.58;
+  line-height: 1.64;
 }
 a { color: inherit; text-decoration: none; }
-img, video { max-width: 100%; display: block; }
+img, video { display: block; max-width: 100%; }
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 40;
+  height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  min-height: 62px;
-  padding: 0 32px;
-  border-bottom: 1px solid rgba(20, 31, 38, .1);
-  background: rgba(255,255,255,.94);
-  backdrop-filter: blur(12px);
+  padding: 0 5.5vw;
+  background: rgba(255, 255, 255, .88);
+  border-bottom: 1px solid rgba(218, 228, 234, .8);
+  backdrop-filter: blur(16px);
 }
-.brand { font-weight: 800; letter-spacing: 0; white-space: nowrap; }
-nav { display: flex; gap: 16px; align-items: center; overflow-x: auto; font-size: 14px; color: var(--muted); }
-nav a { white-space: nowrap; padding: 8px 0; }
-nav a:hover { color: var(--teal); }
-main { width: min(1180px, calc(100vw - 36px)); margin: 0 auto; }
-.site-footer {
-  width: min(1180px, calc(100vw - 36px));
-  margin: 44px auto 0;
-  padding: 24px 0 34px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
+.brand {
+  font-weight: 900;
+  color: #102231;
+  white-space: nowrap;
+}
+.site-header nav {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 17px;
+  overflow-x: auto;
+  white-space: nowrap;
+  color: #315063;
   font-size: 14px;
-}
-.home-hero, .project-hero {
-  min-height: 520px;
-  display: grid;
-  grid-template-columns: .88fr 1.12fr;
-  align-items: center;
-  gap: 32px;
-  padding: 36px 0 28px;
-}
-.home-hero h1, .project-hero h1 {
-  font-size: clamp(34px, 5vw, 58px);
-  line-height: 1.04;
-  margin: 8px 0 18px;
-  letter-spacing: 0;
-}
-.kicker {
-  color: var(--rust);
   font-weight: 800;
+}
+.site-header nav a { padding: 18px 0; }
+.immersive-hero {
+  position: relative;
+  min-height: calc(82vh - 58px);
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  color: #fff;
+  background: #071015;
+}
+.immersive-hero .hero-bg,
+.immersive-hero .hero-slides,
+.immersive-hero .hero-slide {
+  position: absolute;
+  inset: 0;
+}
+.immersive-hero .hero-bg {
+  background-image: var(--hero-image);
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.01);
+}
+.hero-contain .hero-bg {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-color: #071015;
+}
+.hero-slide { opacity: 0; transition: opacity 900ms ease; margin: 0; }
+.hero-slide.is-active { opacity: 1; }
+.hero-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.hero-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(6, 13, 18, .88), rgba(6, 13, 18, .46) 48%, rgba(6, 13, 18, .18)),
+    linear-gradient(0deg, rgba(6, 13, 18, .75), rgba(6, 13, 18, .12) 55%);
+}
+.hero-inner {
+  position: relative;
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 0 0 68px;
+}
+.home-immersive { min-height: calc(88vh - 58px); }
+.kicker {
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, .84);
+}
+h1 {
   margin: 0;
+  font-size: clamp(42px, 7.2vw, 94px);
+  line-height: 1.05;
+  letter-spacing: 0;
+  font-weight: 950;
 }
 .lead {
-  color: #36444c;
-  font-size: 18px;
-  margin: 0 0 22px;
+  max-width: 900px;
+  margin: 22px 0 0;
+  color: rgba(255, 255, 255, .92);
+  font-size: clamp(18px, 2.1vw, 26px);
+  line-height: 1.58;
 }
-.tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag-row span {
-  border: 1px solid var(--line);
-  background: #fff;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  color: #40515b;
-}
-.hero-visual {
-  min-width: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  background: var(--soft);
-}
-.hero-visual img, .hero-visual video { width: 100%; height: 420px; object-fit: cover; }
-.home-visual-grid {
-  display: grid;
-  grid-template-columns: 1.25fr .75fr;
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  background: #fff;
-  padding: 10px;
+  margin-top: 24px;
 }
-.home-visual-grid img { width: 100%; height: 200px; object-fit: cover; border-radius: 6px; }
-.home-visual-grid img:first-child { grid-row: span 2; height: 410px; }
-.section { padding: 24px 0; }
-.section-title { display: flex; align-items: end; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
-.section h2 { font-size: 26px; margin: 0 0 10px; letter-spacing: 0; }
-.section-title p { margin: 0 0 12px; color: var(--muted); }
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.project-card, .media-card, .metric, .text-card, .phone-card {
-  background: var(--panel);
-  border: 1px solid rgba(22,32,38,.08);
+.tag-row span {
+  color: #0d4d6d;
+  background: rgba(245, 252, 255, .94);
+  border: 1px solid rgba(214, 239, 248, .72);
   border-radius: 8px;
-  box-shadow: 0 8px 22px rgba(21,33,40,.05);
+  padding: 7px 12px;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .16);
 }
-.project-card { overflow: hidden; display: flex; flex-direction: column; }
-.project-card img, .project-card video { width: 100%; height: 190px; object-fit: cover; }
-.project-card-body { padding: 14px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
-.project-card h3 { margin: 0; font-size: 18px; line-height: 1.25; }
-.project-card p { margin: 0; color: var(--muted); font-size: 14px; }
-.card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
-.card-meta span { font-size: 12px; color: #4f5d65; background: #f1f4f5; padding: 4px 7px; border-radius: 999px; }
-.button-link { color: var(--teal); font-weight: 800; margin-top: 4px; }
+.hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 9px;
+  z-index: 5;
+}
+.hero-dots button {
+  width: 34px;
+  height: 4px;
+  border: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .42);
+}
+.hero-dots button.is-active { background: #fff; }
+.section {
+  width: min(1180px, calc(100% - 44px));
+  margin: 0 auto;
+  padding: 74px 0 0;
+}
+.section-heading {
+  display: grid;
+  grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr);
+  gap: 34px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(28px, 3.2vw, 46px);
+  line-height: 1.16;
+  letter-spacing: 0;
+}
+.section-heading p {
+  margin: 0;
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 17px;
+}
+.portfolio-stack {
+  display: grid;
+  gap: 28px;
+}
+.showcase-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+  gap: 34px;
+  align-items: stretch;
+  min-height: 360px;
+  padding: 18px;
+  border: 1px solid rgba(210, 222, 230, .88);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(247, 251, 252, .94));
+  box-shadow: var(--shadow);
+}
+.showcase-item:nth-child(even) .showcase-media { order: 2; }
+.showcase-media {
+  position: relative;
+  min-height: 330px;
+  background: #101820;
+  overflow: hidden;
+}
+.showcase-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #101820;
+}
+.showcase-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 18px 18px 18px 4px;
+}
+.showcase-copy .num {
+  color: var(--gold);
+  font-weight: 950;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+}
+.showcase-copy h3 {
+  margin: 0;
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+.showcase-copy p {
+  margin: 14px 0 0;
+  color: #53636e;
+  font-size: 16px;
+}
+.link-button {
+  width: max-content;
+  margin-top: 22px;
+  padding: 10px 15px;
+  border: 1px solid #b9cbd5;
+  border-radius: 8px;
+  color: #174f73;
+  background: #eef8fc;
+  font-weight: 900;
+}
 .metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-.metric { padding: 13px 14px; }
-.metric span { display: block; color: var(--muted); font-size: 13px; }
-.metric strong { display: block; font-size: 24px; margin-top: 3px; }
-.media-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
-.media-grid.two { grid-template-columns: repeat(2, 1fr); }
-.media-card { overflow: hidden; }
-.media-card img, .media-card video { width: 100%; height: 230px; object-fit: cover; background: #edf1f2; }
-.media-card.tall img { height: 420px; object-fit: contain; background: #eef1f2; }
-.media-card div { padding: 12px 13px; }
-.media-card h4 { margin: 0 0 5px; font-size: 16px; }
-.media-card p { margin: 0; color: var(--muted); font-size: 14px; }
-.text-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.text-card { padding: 16px; }
-.text-card h3 { margin: 0 0 8px; font-size: 18px; }
-.text-card p, .text-card li { color: var(--muted); }
-.text-card p { margin: 0; }
-.text-card ul { padding-left: 18px; margin: 0; }
-.auto-carousel { position: relative; min-height: 420px; background: #eef2f3; overflow: hidden; border-radius: 8px; }
-.auto-carousel .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; margin: 0; }
-.auto-carousel .slide.is-active { opacity: 1; }
-.auto-carousel img { width: 100%; height: 100%; object-fit: cover; }
-.auto-carousel figcaption {
-  position: absolute;
-  left: 14px;
-  bottom: 14px;
-  background: rgba(255,255,255,.9);
-  padding: 6px 9px;
-  border-radius: 6px;
-  font-size: 13px;
+.metric {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 19px 20px;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
 }
-.carousel-dots { position: absolute; right: 14px; bottom: 14px; display: flex; gap: 6px; }
-.carousel-dots button { width: 9px; height: 9px; border-radius: 50%; border: 0; background: rgba(255,255,255,.55); padding: 0; }
-.carousel-dots button.is-active { background: var(--teal); }
+.metric strong {
+  display: block;
+  font-size: clamp(25px, 3vw, 38px);
+  color: #125477;
+  line-height: 1.08;
+}
+.metric span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.gallery.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gallery.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.picture-panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(19, 35, 43, .06);
+}
+.picture-panel .picture {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  background: #eef2f4;
+}
+.picture-panel img,
+.picture-panel video {
+  width: 100%;
+  height: 100%;
+  max-height: 520px;
+  object-fit: contain;
+}
+.picture-panel.tall .picture { min-height: 420px; }
+.picture-copy {
+  padding: 15px 16px 17px;
+}
+.picture-copy h3,
+.text-panel h3 {
+  margin: 0 0 7px;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+.picture-copy p,
+.text-panel p,
+.note,
+.rich-copy p,
+.rich-copy li {
+  color: var(--muted);
+  margin: 0;
+}
+.wide-media {
+  background: #0e171d;
+  border: 1px solid var(--line);
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+.wide-media img,
+.wide-media video {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: #0e171d;
+}
 .process {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
-.process div { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 13px; }
-.process strong { display: block; margin-bottom: 4px; }
-.process span { color: var(--muted); font-size: 14px; }
-.phone-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.phone-card { overflow: hidden; background: #f4f6f7; }
-.phone-card img { width: 100%; height: 420px; object-fit: contain; padding: 8px; }
-.phone-card p { margin: 0; padding: 10px 12px; background: #fff; color: var(--muted); font-size: 14px; }
-.flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: stretch; }
-.flow div { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px; position: relative; }
-.flow div:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 50%; transform: translateY(-50%); color: var(--rust); font-weight: 800; }
-.flow strong { display: block; margin-bottom: 4px; }
-.flow span { font-size: 13px; color: var(--muted); }
-.wide-image { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 8px; box-shadow: var(--shadow); }
-.wide-image img { width: 100%; border-radius: 6px; }
-figure { margin: 0; }
-figcaption { color: var(--muted); font-size: 13px; margin-top: 7px; }
-.split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  align-items: start;
-}
+.process div,
+.text-panel,
 .note {
+  border: 1px solid var(--line);
   background: #fff;
-  border-left: 4px solid var(--teal);
-  padding: 13px 15px;
-  color: #35444c;
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+}
+.process strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #112b3a;
+  font-size: 17px;
+}
+.process span {
+  color: var(--muted);
+}
+.text-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.feature-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr);
+  gap: 22px;
+  align-items: stretch;
+}
+.rich-copy {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 22px;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+}
+.rich-copy h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+.rich-copy ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+.phone-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.phone-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+}
+.phone-card img {
+  width: 100%;
+  height: 500px;
+  object-fit: contain;
+  background: #f3f7f8;
+}
+.phone-card p {
+  margin: 10px 0 2px;
+  font-weight: 900;
+  color: #1c3544;
+}
+.site-footer {
+  width: min(1180px, calc(100% - 44px));
+  margin: 70px auto 0;
+  padding: 26px 0 42px;
+  color: #6b7880;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
 }
 @media (max-width: 980px) {
-  .site-header { align-items: flex-start; flex-direction: column; padding: 12px 18px; }
-  main, .site-footer { width: min(100vw - 24px, 760px); }
-  .home-hero, .project-hero, .split { grid-template-columns: 1fr; min-height: auto; }
-  .project-grid, .media-grid, .media-grid.two, .text-grid { grid-template-columns: 1fr; }
-  .metrics { grid-template-columns: repeat(2, 1fr); }
-  .process, .flow, .phone-grid { grid-template-columns: 1fr 1fr; }
-  .flow div::after { display: none; }
-  .hero-visual img, .hero-visual video { height: 300px; }
+  .site-header { padding: 0 18px; }
+  .brand { display: none; }
+  .site-header nav { width: 100%; }
+  .section-heading,
+  .showcase-item,
+  .feature-split,
+  .gallery,
+  .gallery.three,
+  .gallery.four,
+  .text-grid,
+  .process,
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  .showcase-item:nth-child(even) .showcase-media { order: 0; }
+  .showcase-media { min-height: 260px; }
+  .phone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .phone-card img { height: 420px; }
 }
-@media (max-width: 560px) {
-  .metrics, .process, .flow, .phone-grid { grid-template-columns: 1fr; }
-  .site-footer { flex-direction: column; }
-  .home-visual-grid { grid-template-columns: 1fr; }
-  .home-visual-grid img:first-child, .home-visual-grid img { height: 220px; }
+@media (max-width: 620px) {
+  .immersive-hero { min-height: calc(76vh - 58px); }
+  .hero-inner { width: min(100% - 28px, 1180px); padding-bottom: 52px; }
+  h1 { font-size: clamp(36px, 13vw, 62px); }
+  .lead { font-size: 17px; }
+  .section { width: min(100% - 28px, 1180px); padding-top: 52px; }
+  .showcase-item { padding: 12px; gap: 14px; }
+  .phone-grid { grid-template-columns: 1fr; }
 }
 """
-    (REPO / "assets" / "styles.css").write_text(css, encoding="utf-8")
     js = r"""
-document.querySelectorAll('[data-carousel]').forEach((carousel) => {
-  const slides = Array.from(carousel.querySelectorAll('.slide'));
-  const dots = Array.from(carousel.querySelectorAll('.carousel-dots button'));
-  if (slides.length <= 1) return;
-  let index = 0;
-  const show = (next) => {
-    slides[index].classList.remove('is-active');
-    dots[index]?.classList.remove('is-active');
-    index = (next + slides.length) % slides.length;
-    slides[index].classList.add('is-active');
-    dots[index]?.classList.add('is-active');
-  };
-  dots.forEach((dot, i) => dot.addEventListener('click', () => show(i)));
-  setInterval(() => show(index + 1), 3600);
-});
+(function () {
+  function runCarousel(root, slideSelector, dotSelector, interval) {
+    var slides = Array.prototype.slice.call(root.querySelectorAll(slideSelector));
+    var dots = Array.prototype.slice.call(root.querySelectorAll(dotSelector));
+    if (slides.length < 2) return;
+    var index = 0;
+    function show(next) {
+      slides[index].classList.remove("is-active");
+      if (dots[index]) dots[index].classList.remove("is-active");
+      index = (next + slides.length) % slides.length;
+      slides[index].classList.add("is-active");
+      if (dots[index]) dots[index].classList.add("is-active");
+    }
+    dots.forEach(function (dot, i) {
+      dot.addEventListener("click", function () { show(i); });
+    });
+    window.setInterval(function () { show(index + 1); }, interval);
+  }
+  document.querySelectorAll("[data-hero-carousel]").forEach(function (root) {
+    runCarousel(root, ".hero-slide", ".hero-dots button", 4200);
+  });
+})();
 """
-    (REPO / "assets" / "site.js").write_text(js, encoding="utf-8")
-    (REPO / ".nojekyll").write_text("", encoding="utf-8")
+    (ASSETS / "styles.css").write_text(css, encoding="utf-8")
+    (ASSETS / "site.js").write_text(js, encoding="utf-8")
 
 
 def write_index(paths: dict[str, str]) -> None:
     cards = [
-        ("360车载全景影像拼接", "工程车辆四路鱼眼相机 BEV 拼接，上机演示与多尺度环视输出。", paths["avm_demo_bev"], "projects/avm-360.html", ["OpenCV", "BEV", "标定"]),
-        ("ACAF2025金融智能创新大赛", "基金申赎 7 日预测，三等奖，覆盖数据工程、特征融合和 LSTM-Attention。", paths["acaf_award"], "projects/acaf-finance.html", ["PyTorch", "金融预测", "竞赛"]),
-        ("AI健身动作识别与评分", "基于摄像头姿态估计、关键点规则、自动计数与运动反馈的视觉原型。", paths["fitness_gif_squat"], "projects/ai-fitness.html", ["MediaPipe", "OpenCV", "运动健康"]),
-        ("事件与情绪分析 / ETF量化辅助", "多因子 ETF 轮动模拟盘，叠加新闻、公告和社区情绪的信息增强层。", paths["quant_sim"], "projects/quant-agent.html", ["ETF", "Agent", "机器学习"]),
-        ("铁路无人机全景拼接", "从铁路巡检视频抽帧、配准到全景底图生成，服务工业视觉预处理。", paths["rail_final"], "projects/railway-stitching.html", ["SIFT", "RANSAC", "无人机"]),
-        ("物流大数据垂直大模型", "RAG + 工具调用 + 数据分析 Skills，覆盖运价、路径、风险和自动周报。", paths["log_dashboard"], "projects/logistics-llm.html", ["RAG", "Streamlit", "物流"]),
-        ("微信小程序展示合集", "校园网约车、舒腰健脊、登山协会三个小程序的产品与工程展示。", paths["mini_collage"], "projects/miniapps.html", ["小程序", "Vue", "产品原型"]),
+        ("01", "360车载全景影像拼接", "四路鱼眼相机输入、BEV 几何映射、区域融合与上机实测，补充低延迟视频流处理升级。", paths["avm_demo_bev"], "projects/avm-360.html", ["OpenCV", "Fisheye", "BEV"]),
+        ("02", "AFAC2025金融智能创新大赛", "20 只基金未来 7 天申购与赎回预测，多源特征工程与 LSTM-Attention 双通道建模。", paths["acaf_award"], "projects/acaf-finance.html", ["PyTorch", "时间序列", "金融智能"]),
+        ("03", "AI健身动作识别与评分系统", "摄像头姿态估计、关节角度状态机、动作计数、评分与训练反馈展示。", paths["fitness_strip"], "projects/ai-fitness.html", ["MediaPipe", "OpenCV", "运动健康"]),
+        ("04", "事件与情绪分析智能体 / ETF量化辅助系统", "ETF 横截面轮动主引擎结合事件新闻情绪层，用于候选排序、解释和模拟调仓。", paths["quant_sim"], "projects/quant-agent.html", ["ETF轮动", "Agent", "模拟决策"]),
+        ("05", "铁路无人机视频全景拼接", "从连续无人机视频帧生成铁路场景全景底图，支撑巡检场景的大视野观察。", paths["rail_final"], "projects/railway-stitching.html", ["SIFT", "RANSAC", "全景拼接"]),
+        ("06", "物流大数据垂直大模型", "RAG 知识库、物流领域工具调用、路径优化、风险预警与自动周报工作台。", paths["log_dashboard"], "projects/logistics-llm.html", ["RAG", "Streamlit", "路径优化"]),
+        ("07", "微信小程序展示合集", "校园网约车、舒腰健脊、登山协会三个小程序，展示产品流程与前端实现能力。", paths["mini_collage"], "projects/miniapps.html", ["微信小程序", "Vue", "产品原型"]),
     ]
     card_html = ""
-    for title, desc, img, href, tags in cards:
-        meta = "".join(f"<span>{esc(t)}</span>" for t in tags)
+    for num, title, desc, img, href, tags in cards:
         card_html += f"""
-        <a class="project-card" href="{esc(href)}">
-          {media_tag(img, title)}
-          <div class="project-card-body">
+        <article class="showcase-item">
+          <a class="showcase-media" href="{esc(href)}"><img src="{esc(img)}" alt="{esc(title)}" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">{esc(num)}</div>
             <h3>{esc(title)}</h3>
             <p>{esc(desc)}</p>
-            <div class="card-meta">{meta}</div>
-            <span class="button-link">查看项目详情</span>
+            <div class="tag-row">{tags_html(tags)}</div>
+            <a class="link-button" href="{esc(href)}">查看项目</a>
           </div>
-        </a>
+        </article>
         """
-    visual = f"""
-    <div class="home-visual-grid">
-      {media_tag(paths["avm_demo_bev"], "360环视上机展示")}
-      {media_tag(paths["quant_sim"], "量化真实模拟")}
-      {media_tag(paths["mini_collage"], "小程序合集")}
-    </div>
-    """
-    body = f"""
-    <section class="home-hero">
-      <div class="hero-copy">
-        <p class="kicker">Portfolio Overview</p>
-        <h1>王俊松项目作品集</h1>
-        <p class="lead">这里汇总我在计算机视觉、计算成像、金融智能、RAG 应用和微信小程序方向的代表项目。每个项目都保留关键截图、结果图和数据事实，便于快速了解项目目标、核心做法与可展示成果。</p>
-        <div class="tag-row">
-          <span>Computer Vision</span><span>Financial AI</span><span>RAG / Agent</span><span>Mini Program</span><span>Python / OpenCV / PyTorch</span>
-        </div>
-      </div>
-      <div class="hero-visual">{visual}</div>
-    </section>
-    {section("项目总览", f'<div class="project-grid">{card_html}</div>')}
-    """
-    (REPO / "index.html").write_text(page_shell("项目作品集概览", "王俊松项目作品集总览", body), encoding="utf-8")
+    body = home_hero([
+        paths["acaf_award"],
+        paths["acaf_trophy"],
+        paths["acaf_roadshow"],
+        paths["rail_final"],
+        paths["quant_latest"],
+    ])
+    body += section("代表项目", f'<div class="portfolio-stack">{card_html}</div>', subtitle="以项目目标、关键做法和可视化成果为主线组织，首页保留静态展示，详细页展开完整材料。")
+    (REPO / "index.html").write_text(page_shell("项目作品集概览", "计算机视觉、计算成像、金融智能、RAG 与微信小程序项目作品集", body), encoding="utf-8")
 
 
 def write_avm(paths: dict[str, str]) -> None:
-    visual = carousel([
-        (f"../{paths['avm_demo_bev']}", "上机鸟瞰图"),
-        (f"../{paths['avm_demo_front']}", "前向相机上机画面"),
-        (f"../{paths['avm_demo_left']}", "左侧相机上机画面"),
-        (f"../{paths['avm_demo_right']}", "右侧相机上机画面"),
-        (f"../{paths['avm_demo_back']}", "后向相机上机画面"),
-    ])
-    body = hero(
+    body = immersive_hero(
         "360车载全景影像拼接",
-        "工程车辆四路鱼眼相机 BEV 拼接",
-        "基于前、后、左、右四路鱼眼相机图像完成去畸变、地面单应性变换、有效区域融合和上机展示，形成可复盘的装载机场景环视拼接结果。",
-        visual,
+        "工程车辆四路鱼眼相机 · BEV 环视拼接",
+        "基于前、后、左、右四路鱼眼相机图像，完成去畸变、地面单应性投影、区域融合、上机展示和低延迟处理升级。",
+        f"../{paths['avm_raw_front']}",
         ["OpenCV", "Fisheye", "Homography", "BEV Fusion"],
+        contain=True,
     )
     body += section("相关参数", metric_cards([
-        ("输入相机", "front / left / right / back"),
+        ("输入相机", "4 路"),
         ("标定点", "每路 8 个外角点"),
-        ("back 重投影误差", "平均 1.352px"),
-        ("输出画布", "1216x1436 / 1600x1800 / 2000x2300"),
+        ("back 重投影误差", "1.352px"),
+        ("优化后处理均值", "95.9ms"),
     ]))
-    body += section("上机演示图片", f"""
-      <div class="media-grid">
-        {image_card(f"../{paths['avm_demo_front']}", "前向视角")}
-        {image_card(f"../{paths['avm_demo_left']}", "左侧视角")}
-        {image_card(f"../{paths['avm_demo_right']}", "右侧视角")}
-        {image_card(f"../{paths['avm_demo_back']}", "后向视角")}
-        {image_card(f"../{paths['avm_demo_bev']}", "鸟瞰展示")}
+    body += section("输入图像", f"""
+      <div class="gallery four">
+        {picture_panel(f"../{paths['avm_raw_front']}", "前向原始图像")}
+        {picture_panel(f"../{paths['avm_raw_left']}", "左侧原始图像")}
+        {picture_panel(f"../{paths['avm_raw_right']}", "右侧原始图像")}
+        {picture_panel(f"../{paths['avm_raw_back']}", "后向原始图像")}
+      </div>
+    """, subtitle="四路鱼眼图像作为 BEV 拼接输入，页面采用等比缩放展示，避免裁掉有效信息。")
+    body += section("结果展示", f"""
+      <div class="gallery">
+        {picture_panel(f"../{paths['avm_baseline']}", "基础 BEV 融合结果")}
+        {picture_panel(f"../{paths['avm_owned']}", "ownership-prior 区域融合")}
+        {picture_panel(f"../{paths['avm_safe']}", "extended safe 输出")}
+        {picture_panel(f"../{paths['avm_wide']}", "extended wide 输出")}
       </div>
     """)
-    body += section("BEV 拼接结果", f"""
-      <div class="media-grid two">
-        {image_card(f"../{paths['avm_baseline']}", "baseline 距离权重融合")}
-        {image_card(f"../{paths['avm_owned']}", "ownership-prior 区域融合")}
-        {image_card(f"../{paths['avm_safe']}", "extended safe 输出")}
-        {image_card(f"../{paths['avm_wide']}", "extended wide 输出")}
+    body += section("上机实测", f"""
+      <div class="gallery three">
+        {picture_panel(f"../{paths['avm_demo_front']}", "前向上机画面")}
+        {picture_panel(f"../{paths['avm_demo_left']}", "左侧上机画面")}
+        {picture_panel(f"../{paths['avm_demo_right']}", "右侧上机画面")}
+        {picture_panel(f"../{paths['avm_demo_back']}", "后向上机画面")}
+        {picture_panel(f"../{paths['avm_demo_bev']}", "上机鸟瞰输出")}
+      </div>
+    """)
+    latency_images = ""
+    if "avm_latency_compare" in paths:
+        latency_images += picture_panel(f"../{paths['avm_latency_compare']}", "优化前后对比")
+    if "avm_latency_breakdown" in paths:
+        latency_images += picture_panel(f"../{paths['avm_latency_breakdown']}", "处理耗时分解")
+    body += section("视频流低延迟升级", f"""
+      <div class="feature-split">
+        <div class="rich-copy">
+          <h3>从离线拼接走向视频流处理</h3>
+          <p>在原始拼接链路上补充四路 UDP 视频流输入与运行接口，并围绕 warp、bottom multiH、blend 和内存分配环节做处理耗时优化。</p>
+          <ul>
+            <li>原始处理均值约 1025.1ms，输出约 0.98 FPS。</li>
+            <li>优化后处理均值约 95.9ms，输出约 10.43 FPS。</li>
+            <li>四路端口接口按 front / left / right / bottom 分离，便于接入多摄像头视频流。</li>
+          </ul>
+        </div>
+        <div class="gallery">{latency_images}</div>
       </div>
     """)
     body += section("算法流程", """
       <div class="process">
-        <div><strong>1. 相机输入</strong><span>四路鱼眼图像与标定板点位进入统一配置。</span></div>
-        <div><strong>2. 几何映射</strong><span>鱼眼去畸变后通过地面单应性投影到 BEV 坐标。</span></div>
-        <div><strong>3. 区域融合</strong><span>使用有效区域 mask、距离权重和 ownership-prior 降低重影。</span></div>
-        <div><strong>4. 展示输出</strong><span>生成多尺度 BEV 结果并结合上机画面完成展示。</span></div>
+        <div><strong>相机输入</strong><span>采集四路鱼眼图像并统一标定点配置。</span></div>
+        <div><strong>几何映射</strong><span>去畸变后通过地面单应性投影到 BEV 坐标系。</span></div>
+        <div><strong>区域融合</strong><span>结合有效区域 mask、距离权重与 ownership-prior 降低重影。</span></div>
+        <div><strong>展示输出</strong><span>生成多尺度 BEV 结果，并接入上机和视频流演示链路。</span></div>
       </div>
     """)
     (PROJECTS_DIR / "avm-360.html").write_text(page_shell("360车载全景影像拼接", "装载机四路鱼眼相机 BEV 拼接项目", body, active="avm"), encoding="utf-8")
 
 
 def write_acaf(paths: dict[str, str]) -> None:
-    visual = carousel([
-        (f"../{paths['acaf_roadshow']}", "路演现场"),
-        (f"../{paths['acaf_award']}", "颁奖仪式"),
-        (f"../{paths['acaf_trophy']}", "奖金奖杯"),
-    ])
-    body = hero(
-        "AFAC2025金融智能创新大赛",
-        "基金申赎长周期预测",
-        "围绕 20 只基金未来 7 日申购与赎回预测，完成多源特征构建、LSTM-Attention 双通道建模、预测结果输出和路演交付，项目获得 AFAC2025 金融智能创新大赛三等奖。",
-        visual,
-        ["PyTorch", "LSTM-Attention", "多源特征", "队长"],
+    body = immersive_hero(
+        "基金产品长周期申购与赎回预测",
+        "AFAC2025 金融智能创新大赛 · 晨曦组",
+        "多源特征工程、LSTM-Attention 双通道建模，面向 20 只基金输出未来 7 天申购与赎回预测，并完成竞赛路演交付。",
+        f"../{paths['acaf_roadshow']}",
+        ["Python", "PyTorch", "时间序列预测", "金融数据建模", "特征工程"],
     )
     body += section("赛程数据", metric_cards([
-        ("基金数量", "20 只"),
-        ("训练集规模", "9460 行 / 18 列"),
-        ("缺失值", "0"),
+        ("最终训练集", "9,460 行"),
+        ("覆盖基金", "20 只"),
+        ("训练字段", "18 列"),
         ("预测结果", "140 条"),
     ]))
-    body += section("数据与模型流程", f"""
-      <div class="media-grid two">
-        {image_card(f"../{paths['acaf_arch']}", "数据流与模型结构")}
-        {image_card(f"../{paths['acaf_pred']}", "7 日申购/赎回预测汇总")}
-        {image_card(f"../{paths['acaf_top10']}", "基金预测结果 Top10")}
-        {image_card(f"../{paths['acaf_monthly']}", "训练数据月度变化")}
-      </div>
-    """)
-    body += section("证书展示", f"""
-      <div class="split">
-        <div class="wide-image">{media_tag(f"../{paths['acaf_certificate']}", "获奖证书")}</div>
-        <div class="text-card">
-          <h3>项目职责</h3>
+    body += section("架构与数据流", f"""
+      <div class="feature-split">
+        <div class="wide-media">{media_tag(f"../{paths['acaf_arch']}", "项目架构与数据流图")}</div>
+        <div class="rich-copy">
+          <h3>从赛题数据到预测交付</h3>
+          <p>项目将基金申赎曝光、百度指数、市场指数、节假日、发薪日概率与情绪特征对齐到基金-日期维度，再用 7 天历史窗口预测未来 7 天资金流。</p>
           <ul>
-            <li>统筹数据工程、特征构建、模型调研和路演材料。</li>
-            <li>将赛方申赎曝光、日历、百度指数、市场指数、投资者情绪和发薪特征对齐到基金/日期维度。</li>
-            <li>参与申购/赎回双通道模型设计，用 7 天历史窗口预测未来 7 天资金流。</li>
+            <li>申购与赎回采用双通道建模，降低两个目标之间的信号混淆。</li>
+            <li>注意力层用于提取时间窗口内的重点波动和节奏变化。</li>
+            <li>输出结果转化为图表和路演材料，支撑现场讲解。</li>
           </ul>
         </div>
+      </div>
+    """)
+    body += section("结果图表", f"""
+      <div class="gallery">
+        {picture_panel(f"../{paths['acaf_pred']}", "7 日申购/赎回预测汇总")}
+        {picture_panel(f"../{paths['acaf_top10']}", "基金预测结果 Top10")}
+        {picture_panel(f"../{paths['acaf_monthly']}", "训练数据月度变化")}
+        {picture_panel(f"../{paths['acaf_corr']}", "主要特征相关性")}
+      </div>
+    """)
+    body += section("路演与证书", f"""
+      <div class="gallery three">
+        {picture_panel(f"../{paths['acaf_award']}", "颁奖仪式")}
+        {picture_panel(f"../{paths['acaf_trophy']}", "奖金奖杯")}
+        {picture_panel(f"../{paths['acaf_certificate']}", "获奖证书")}
       </div>
     """)
     (PROJECTS_DIR / "acaf-finance.html").write_text(page_shell("AFAC2025金融智能创新大赛", "基金申赎 7 日预测项目", body, active="acaf"), encoding="utf-8")
 
 
 def write_fitness(paths: dict[str, str]) -> None:
-    body = hero(
+    body = immersive_hero(
         "AI健身动作识别与评分系统",
-        "实时姿态估计与运动反馈",
-        "基于摄像头画面进行人体姿态估计、关键点提取、动作规则建模、自动计数和评分反馈，覆盖深蹲、俯卧撑、引体向上、仰卧起坐等运动场景。",
-        media_tag(f"../{paths['fitness_home']}", "AI健身首页图"),
-        ["MediaPipe Pose", "OpenCV", "动作计数", "运动健康"],
+        "实时姿态估计 · 动作计数 · 运动反馈",
+        "基于摄像头或视频输入进行人体关键点识别、关节角度计算、动作阶段判断、自动计数、评分和反馈展示。",
+        f"../{paths['fitness_bg']}",
+        ["MediaPipe Pose", "OpenCV", "状态机计数", "运动健康"],
     )
-    body += section("项目展示", f"""
-      <div class="media-grid two">
-        {image_card(f"../{paths['fitness_gif_squat']}", "深蹲识别动图", "实时骨架叠加、角度判断和计数反馈。")}
-        {image_card(f"../{paths['fitness_gif_pushup']}", "俯卧撑识别动图", "通过阶段状态机降低单帧阈值误触发。")}
-      </div>
-    """)
-    body += section("动作截图", f"""
-      <div class="media-grid">
-        {image_card(f"../{paths['fitness_squat']}", "深蹲")}
-        {image_card(f"../{paths['fitness_pushup']}", "俯卧撑")}
-        {image_card(f"../{paths['fitness_pullup']}", "引体向上")}
-        {image_card(f"../{paths['fitness_situp']}", "仰卧起坐")}
-      </div>
-    """)
-    body += section("识别链路", """
+    body += section("核心流程", """
       <div class="process">
-        <div><strong>1. 视频输入</strong><span>摄像头或本地视频作为实时/离线处理入口。</span></div>
-        <div><strong>2. 姿态估计</strong><span>提取肩、肘、腕、髋、膝、踝等关键点。</span></div>
-        <div><strong>3. 规则判别</strong><span>用关节角度、动作阶段和状态机完成计数。</span></div>
-        <div><strong>4. 反馈展示</strong><span>叠加骨架、分数、次数、热量和训练反馈。</span></div>
+        <div><strong>视频输入</strong><span>摄像头或本地 MP4 由 OpenCV 逐帧读取。</span></div>
+        <div><strong>姿态估计</strong><span>提取肩、肘、腕、髋、膝、踝等人体关键点。</span></div>
+        <div><strong>规则判别</strong><span>通过关节角度和 up/down 阶段状态完成动作计数。</span></div>
+        <div><strong>反馈展示</strong><span>将骨架、分数、次数、平均分和即时反馈叠加到画面。</span></div>
+      </div>
+    """)
+    body += section("动作识别动图", f"""
+      <div class="gallery four">
+        {picture_panel(f"../{paths['fitness_gif_squat']}", "深蹲识别", "膝关节与髋关节角度用于阶段判断。")}
+        {picture_panel(f"../{paths['fitness_gif_pushup']}", "俯卧撑识别", "肩肘腕关键点用于计数和评分反馈。")}
+        {picture_panel(f"../{paths['fitness_gif_pullup']}", "引体向上识别", "背面姿态画面中识别肩臂动作变化。")}
+        {picture_panel(f"../{paths['fitness_gif_situp']}", "仰卧起坐识别", "肩髋膝角度用于起身与躺下阶段判断。")}
+      </div>
+    """, subtitle="四类动作统一按等比缩放展示，保留视频画面中的骨架、计数和反馈信息。")
+    body += section("项目截图", f"""
+      <div class="gallery four">
+        {picture_panel(f"../{paths['fitness_squat']}", "深蹲截图")}
+        {picture_panel(f"../{paths['fitness_pushup']}", "俯卧撑截图")}
+        {picture_panel(f"../{paths['fitness_pullup']}", "引体向上截图")}
+        {picture_panel(f"../{paths['fitness_situp']}", "仰卧起坐截图")}
+      </div>
+    """)
+    body += section("能力拆解", """
+      <div class="text-grid">
+        <article class="text-panel"><h3>视觉感知</h3><p>把实时视频画面转化为人体关键点序列，为动作判断提供稳定输入。</p></article>
+        <article class="text-panel"><h3>规则建模</h3><p>不同动作对应不同角度组合与阶段阈值，避免单帧误触发导致重复计数。</p></article>
+        <article class="text-panel"><h3>产品展示</h3><p>将分数、次数、热量和动作反馈组织到前端展示链路，形成可演示闭环。</p></article>
       </div>
     """)
     (PROJECTS_DIR / "ai-fitness.html").write_text(page_shell("AI健身动作识别与评分系统", "姿态估计、动作计数与运动反馈项目", body, active="fitness"), encoding="utf-8")
 
 
 def write_quant(paths: dict[str, str]) -> None:
-    body = hero(
+    body = immersive_hero(
         "事件与情绪分析智能体 / ETF量化辅助系统",
-        "多因子量化主引擎 + 信息增强层",
-        "系统以 ETF 横截面轮动模型为主引擎，结合事件新闻情绪感知 Agent 生成事件对象、板块情绪和 ETF 信息增强画像，用于模型输出后的确认、降权、风险过滤和解释。",
-        media_tag(f"../{paths['quant_latest']}", "最新预测截图"),
-        ["ETF轮动", "Logistic / XGBoost / LightGBM", "事件情绪 Agent", "Tkinter"],
+        "ETF 横截面轮动 · 信息增强 · 模拟决策",
+        "以 ETF 横截面轮动预测为主引擎，结合事件新闻情绪感知 Agent 生成事件对象、板块情绪和 ETF 信息增强画像，用于候选排序解释、风险过滤和模拟调仓。",
+        f"../{paths['quant_bg']}",
+        ["ETF轮动", "Logistic / XGBoost / LightGBM", "事件情绪 Agent", "模拟决策"],
     )
     body += section("系统数据", metric_cards([
-        ("ETF 因子记录", "62835 行"),
-        ("交易日", "1781 个"),
-        ("入模特征", "46 个"),
-        ("V2 事件对象", "2145 条"),
+        ("ETF 因子记录", "62,835 行"),
+        ("交易日", "1,781 个"),
+        ("固定特征", "46 个"),
+        ("事件对象", "2,145 条"),
     ]))
-    body += section("量化预测与模拟", f"""
-      <div class="media-grid two">
-        {image_card(f"../{paths['quant_latest']}", "最新预测界面", "查看模型预测、策略目标和候选 ETF 排序。")}
-        {image_card(f"../{paths['quant_sim']}", "真实模拟", "从一个观察日开始，按所选策略每10个交易日滚动调仓，模拟资金变化。")}
-        {image_card(f"../{paths['quant_top3']}", "最新 Top3 概率")}
-        {image_card(f"../{paths['quant_eval']}", "模型评估示例")}
+    body += section("工作台展示", f"""
+      <div class="feature-split">
+        <div class="wide-media">{media_tag(f"../{paths['quant_latest']}", "最新预测界面")}</div>
+        <div class="rich-copy">
+          <h3>从预测排序到策略观察</h3>
+          <p>系统预测未来 10 个交易日是否跑赢候选池中位数，并将模型输出组织为候选 ETF、概率、策略目标和观察信息。</p>
+          <ul>
+            <li>多模型输出用于比较不同表格建模方法的排序稳定性。</li>
+            <li>事件与情绪层用于解释 ETF 信号背后的板块、新闻和社区情绪变化。</li>
+            <li>模拟调仓用于观察策略在连续交易日上的资金曲线变化。</li>
+          </ul>
+        </div>
+      </div>
+    """)
+    body += section("预测与模拟结果", f"""
+      <div class="gallery">
+        {picture_panel(f"../{paths['quant_sim']}", "真实模拟", "从一个观察日开始，按所选策略每10个交易日滚动调仓，模拟资金变化。")}
+        {picture_panel(f"../{paths['quant_top3']}", "最新 Top3 概率")}
+        {picture_panel(f"../{paths['quant_eval']}", "模型评估示例")}
+        {picture_panel(f"../{paths['quant_old_auc']}", "测试集 AUC 源图")}
       </div>
     """)
     body += section("事件与情绪增强层", """
       <div class="text-grid">
-        <div class="text-card"><h3>数据入口</h3><p>接入财经新闻、专业披露与会议纪要、基金社区评论等真实公开源，形成每日原始汇总和统一证据对象。</p></div>
-        <div class="text-card"><h3>结构化处理</h3><p>通过质量评分、跨源聚类、事件本体映射、LLM 结构化增强和规则回退，生成事件对象与板块情绪。</p></div>
-        <div class="text-card"><h3>量化承接</h3><p>事件/情绪层不替代量化排序，而用于解释模型结果、识别负面风险、提示板块热度和辅助复盘。</p></div>
+        <article class="text-panel"><h3>信息采集</h3><p>接入财经新闻、公告披露、会议纪要和基金社区评论，形成每日原始信息池。</p></article>
+        <article class="text-panel"><h3>事件结构化</h3><p>通过质量评分、跨源聚类、事件本体映射和 LLM 结构化提取生成事件对象。</p></article>
+        <article class="text-panel"><h3>量化承接</h3><p>事件层不替代量化排序，而是用于解释模型结果、提示风险和辅助复盘。</p></article>
       </div>
     """)
     (PROJECTS_DIR / "quant-agent.html").write_text(page_shell("事件与情绪分析智能体 / ETF量化辅助系统", "ETF 轮动、事件情绪和模拟决策系统", body, active="quant"), encoding="utf-8")
 
 
 def write_railway(paths: dict[str, str]) -> None:
-    body = hero(
+    body = immersive_hero(
         "铁路无人机视频全景拼接",
-        "工业巡检视频到全景底图",
-        "面向铁路巡检视频视野碎片化的问题，完成视频抽帧、特征匹配、几何配准、全局位姿链和全景输出，为后续部件识别和巡检勘察提供大视野底图。",
-        media_tag(f"../{paths['rail_final']}", "铁路全景拼接结果"),
+        "无人机影像 · 图像拼接 · OpenCV 原型",
+        "面向铁路巡检视频视野碎片化的问题，完成视频抽帧、特征匹配、几何配准、全局位姿链和全景输出，形成可复盘的大视野铁路场景底图。",
+        f"../{paths['rail_final']}",
         ["OpenCV", "SIFT / RootSIFT", "RANSAC", "无人机影像"],
+        contain=True,
     )
     body += section("项目状态", metric_cards([
-        ("输入帧", "58 张 1920x1080"),
+        ("输入帧", "58 张"),
         ("匹配边日志", "227 条"),
         ("位姿链", "58 帧"),
-        ("全景输出", "13567x11902"),
+        ("全景输出", "13,567x11,902"),
     ]))
     body += section("视频与拼接过程", f"""
-      <div class="media-grid two">
-        {image_card(f"../{paths['rail_video_gif']}", "原始无人机视频片段", "连续航拍画面作为拼接输入。")}
-        {image_card(f"../{paths['rail_reveal']}", "全景逐步成图效果", "用逐步展开的方式展示全景结果的形成。")}
+      <div class="gallery">
+        {picture_panel(f"../{paths['rail_video_gif']}", "原始无人机视频片段", "连续航拍画面作为拼接输入。")}
+        {picture_panel(f"../{paths['rail_reveal']}", "全景逐步成图", "用逐步展开的方式展示铁路场景底图的形成过程。")}
       </div>
     """)
-    body += section("关键帧与结果", f"""
-      <div class="media-grid">
-        {image_card(f"../{paths['rail_frame1']}", "输入帧 01")}
-        {image_card(f"../{paths['rail_frame29']}", "输入帧 29")}
-        {image_card(f"../{paths['rail_frame58']}", "输入帧 58")}
+    body += section("关键帧与全景结果", f"""
+      <div class="gallery three">
+        {picture_panel(f"../{paths['rail_frame1']}", "输入帧 01")}
+        {picture_panel(f"../{paths['rail_frame29']}", "输入帧 29")}
+        {picture_panel(f"../{paths['rail_frame58']}", "输入帧 58")}
       </div>
-      <div class="wide-image" style="margin-top:14px">{media_tag(f"../{paths['rail_final']}", "全景输出")}</div>
+      <div class="wide-media" style="margin-top:20px">{media_tag(f"../{paths['rail_final']}", "全景输出")}</div>
     """)
     body += section("技术路线", """
       <div class="process">
-        <div><strong>1. 视频抽帧</strong><span>从无人机视频中筛选连续帧并整理为拼接序列。</span></div>
-        <div><strong>2. 特征匹配</strong><span>SIFT/RootSIFT 提取局部特征，KNN 生成候选匹配。</span></div>
-        <div><strong>3. 几何配准</strong><span>RANSAC 估计仿射关系，ECC 处理弱连接场景。</span></div>
-        <div><strong>4. 全景输出</strong><span>基于全局位姿链生成铁路场景大视野底图。</span></div>
+        <div><strong>视频抽帧</strong><span>从无人机视频中筛选连续帧并整理为拼接序列。</span></div>
+        <div><strong>特征匹配</strong><span>SIFT/RootSIFT 提取局部特征，KNN 生成候选匹配。</span></div>
+        <div><strong>几何配准</strong><span>RANSAC 估计仿射关系，处理弱连接和视角变化。</span></div>
+        <div><strong>全景输出</strong><span>基于全局位姿链生成铁路场景大视野底图。</span></div>
       </div>
-    """)
-    body += section("成果说明", """
-      <div class="note">当前页面展示的是图像拼接与巡检底图生成能力，核心价值在于把碎片化视频帧转化为可观察、可复盘的大视野场景。后续可以继续接入部件标注、目标检测和地理定位信息，形成更完整的铁路视觉巡检链路。</div>
     """)
     (PROJECTS_DIR / "railway-stitching.html").write_text(page_shell("铁路无人机视频全景拼接", "铁路巡检视频全景拼接项目", body, active="rail"), encoding="utf-8")
 
 
 def write_logistics(paths: dict[str, str]) -> None:
-    body = hero(
-        "物流大数据垂直大模型应用原型",
-        "RAG + 工具调用 + 数据分析 Skills",
-        "面向物流公共服务平台中的智能问答、运价分析、路径优化、风险预警和自动周报场景，构建一个可离线演示的垂直大模型应用原型。",
-        media_tag(f"../{paths['log_dashboard']}", "物流运行态势面板"),
-        ["RAG", "Streamlit", "Dijkstra", "自动周报"],
+    body = immersive_hero(
+        "物流大数据垂直大模型",
+        "RAG 知识库 · 物流 Skills · 数据工作台",
+        "围绕物流公共服务平台中的智能问答、运价分析、路径优化、风险预警和自动周报场景，构建垂直大模型应用原型。",
+        f"../{paths['log_bg']}",
+        ["RAG", "Streamlit", "路径优化", "风险预警", "自动周报"],
     )
     body += section("数据资产", metric_cards([
-        ("模拟运单", "1766 条"),
+        ("模拟运单", "1,766 条"),
         ("仓储记录", "222 条"),
         ("节点风险", "296 条"),
-        ("路线边", "32 条"),
+        ("路线网络边", "32 条"),
     ]))
+    body += section("总体架构", f"""
+      <div class="feature-split">
+        <div class="wide-media">{media_tag(f"../{paths['log_arch']}", "项目总体架构")}</div>
+        <div class="rich-copy">
+          <h3>数据、知识与工具协同</h3>
+          <p>项目将结构化物流数据、业务知识库和可计算 Skills 放在同一工作台中，面向问答、预测、路径、风险和报告任务提供统一入口。</p>
+          <ul>
+            <li>结构化数据用于运价、路线、风险和需求类分析。</li>
+            <li>RAG 知识库承接政策、冷链 SOP、铁路通道和数据治理材料。</li>
+            <li>确定性工具负责路径计算、指标统计和风险判断，再由应用层组织成可读结果。</li>
+          </ul>
+        </div>
+      </div>
+    """)
     body += section("系统展示", f"""
-      <div class="media-grid two">
-        {image_card(f"../{paths['log_arch']}", "项目总体架构")}
-        {image_card(f"../{paths['log_dashboard']}", "运行态势面板")}
-        {image_card(f"../{paths['log_route']}", "路径优化演示")}
-        {image_card(f"../{paths['log_rag']}", "RAG 与技能调用链")}
+      <div class="gallery">
+        {picture_panel(f"../{paths['log_dashboard']}", "运行态势面板")}
+        {picture_panel(f"../{paths['log_route']}", "路径优化演示")}
+        {picture_panel(f"../{paths['log_rag']}", "RAG 与技能调用链")}
       </div>
     """)
     body += section("应用能力", """
       <div class="text-grid">
-        <div class="text-card"><h3>结构化数据分析</h3><p>运单、仓储、节点和路网数据进入指标层，用于运价、风险、需求和路径类任务。</p></div>
-        <div class="text-card"><h3>知识库检索</h3><p>政策、冷链 SOP、铁路通道、风险处置和数据治理文档统一进入检索链路。</p></div>
-        <div class="text-card"><h3>领域工具调用</h3><p>金额、路径、预测和风险判断交给确定性 Skills 执行，再由应用层组织成可读报告。</p></div>
+        <article class="text-panel"><h3>智能问答</h3><p>面向物流政策、冷链规范、运输通道和业务流程进行知识检索与问答组织。</p></article>
+        <article class="text-panel"><h3>运营分析</h3><p>基于运单、仓储和节点数据汇总运价、风险、需求和服务质量指标。</p></article>
+        <article class="text-panel"><h3>辅助决策</h3><p>把路径优化、风险预警和自动周报整合为可演示的业务工作台。</p></article>
       </div>
     """)
-    (PROJECTS_DIR / "logistics-llm.html").write_text(page_shell("物流大数据垂直大模型应用原型", "物流 RAG 与工具调用系统", body, active="logistics"), encoding="utf-8")
+    (PROJECTS_DIR / "logistics-llm.html").write_text(page_shell("物流大数据垂直大模型", "物流 RAG 与工具调用系统", body, active="logistics"), encoding="utf-8")
+
+
+def phone_cards(paths: dict[str, str], keys: list[str], labels: list[str]) -> str:
+    return "".join(
+        f'<div class="phone-card">{media_tag(f"../{paths[key]}", labels[i])}<p>{esc(labels[i])}</p></div>'
+        for i, key in enumerate(keys)
+    )
 
 
 def write_miniapps(paths: dict[str, str]) -> None:
-    def phone_cards(keys: list[str], labels: list[str]) -> str:
-        return "".join(f'<div class="phone-card">{media_tag(f"../{paths[key]}", labels[i])}<p>{esc(labels[i])}</p></div>' for i, key in enumerate(keys))
-
-    body = hero(
+    body = immersive_hero(
         "微信小程序展示合集",
-        "校园网约车 / 舒腰健脊 / 登山协会",
-        "三个小程序覆盖校园出行、康复健康管理和社团活动服务，重点展示从需求拆解、页面流程、状态联动到可运行 Demo 的产品工程能力。",
-        media_tag(f"../{paths['mini_collage']}", "小程序合集"),
+        "校园网约车 · 舒腰健脊 · 登山协会",
+        "三个小程序覆盖校园出行、康复健康管理和社团活动服务，展示需求拆解、页面流程、状态联动与可运行 Demo 的产品工程能力。",
+        f"../{paths['mini_bg']}",
         ["微信小程序", "uni-app / Vue 3", "产品原型", "状态联动"],
     )
     body += section("统一产品链路", """
-      <div class="flow">
+      <div class="process">
         <div><strong>需求拆解</strong><span>把真实场景拆成角色、任务和页面入口。</span></div>
-        <div><strong>数据建模</strong><span>用本地 Mock / storage 承接用户、订单、训练、随访和活动数据。</span></div>
+        <div><strong>数据建模</strong><span>用本地 Mock / storage 承接订单、训练、随访和活动数据。</span></div>
         <div><strong>页面实现</strong><span>按主流程组织首页、详情、表单、记录和个人中心。</span></div>
         <div><strong>交互闭环</strong><span>让创建、加入、打卡、评价、随访和报名动作产生状态联动。</span></div>
-        <div><strong>展示交付</strong><span>用截图与录屏展示端到端体验。</span></div>
       </div>
     """)
     body += section("校园网约车项目", f"""
-      <div class="split">
-        <div class="media-card">{media_tag(f"../{paths['mini_campus_video']}", "校园网约车演示视频", poster=f"../{paths['mini_campus_1']}")}<div><h4>演示视频</h4><p>覆盖找单、发起拼单、订单详情、行程管理和历史评价。</p></div></div>
-        <div class="text-card"><h3>核心流程</h3><ul><li>首页找单、路线筛选、发起拼单和订单详情。</li><li>本地 Mock 数据驱动成团进度、座位、费用和司机状态。</li><li>验证 H5 与微信小程序构建，适合展示跨端原型能力。</li></ul></div>
+      <div class="feature-split">
+        <div class="picture-panel">
+          <div class="picture">{media_tag(f"../{paths['mini_campus_video']}", "校园网约车演示视频", poster=f"../{paths['mini_campus_1']}")}</div>
+          <div class="picture-copy"><h3>演示视频</h3><p>覆盖找单、发起拼单、订单详情、行程管理和历史评价。</p></div>
+        </div>
+        <div class="rich-copy">
+          <h3>校园出行拼车闭环</h3>
+          <p>以校园到机场/高铁站等高频出行场景为主线，把发起拼单、路线筛选、费用预估、成团进度和个人行程串成完整流程。</p>
+          <ul><li>首页承接路线与时段筛选。</li><li>订单页展示座位、费用和成团状态。</li><li>个人中心保留常用路线和历史评价。</li></ul>
+        </div>
       </div>
-      <div class="phone-grid" style="margin-top:14px">
-        {phone_cards(['mini_campus_1','mini_campus_2','mini_campus_3','mini_campus_4'], ['拼车调度台','发起拼单','订单详情','我的行程'])}
+      <div class="phone-grid" style="margin-top:16px">
+        {phone_cards(paths, ['mini_campus_1','mini_campus_2','mini_campus_3','mini_campus_4'], ['拼车调度台','发起拼单','订单详情','我的行程'])}
       </div>
     """)
     body += section("舒腰健脊 App / 小程序", f"""
-      <div class="split">
-        <div class="media-card">{media_tag(f"../{paths['mini_shuy_video']}", "舒腰健脊演示视频", poster=f"../{paths['mini_shuy_1']}")}<div><h4>演示视频</h4><p>患者端与诊疗师端双角色健康管理原型。</p></div></div>
-        <div class="text-card"><h3>核心流程</h3><ul><li>患者端：首页、评估、训练、随访和个人中心。</li><li>诊疗师端：工作台、方案、随访和患者管理。</li><li>围绕康复训练、疼痛记录和问诊报告构建状态联动。</li></ul></div>
+      <div class="feature-split">
+        <div class="picture-panel">
+          <div class="picture">{media_tag(f"../{paths['mini_shuy_video']}", "舒腰健脊演示视频", poster=f"../{paths['mini_shuy_1']}")}</div>
+          <div class="picture-copy"><h3>演示视频</h3><p>患者端与诊疗师端双角色健康管理原型。</p></div>
+        </div>
+        <div class="rich-copy">
+          <h3>康复训练与随访管理</h3>
+          <p>围绕腰背健康管理构建患者端训练、评估、随访和医生端工作台，让健康记录、训练方案与随访沟通形成连续链路。</p>
+          <ul><li>患者端聚焦训练课程、问诊评估和个人记录。</li><li>医生端聚焦方案、患者管理和随访事项。</li><li>双角色信息结构清晰，适合展示医疗健康类产品原型能力。</li></ul>
+        </div>
       </div>
-      <div class="phone-grid" style="margin-top:14px">
-        {phone_cards(['mini_shuy_1','mini_shuy_2','mini_shuy_3','mini_shuy_4'], ['患者端首页','训练课程','问诊评估','医生工作台'])}
+      <div class="phone-grid" style="margin-top:16px">
+        {phone_cards(paths, ['mini_shuy_1','mini_shuy_2','mini_shuy_3','mini_shuy_4'], ['患者端首页','训练课程','问诊评估','医生工作台'])}
       </div>
     """)
     body += section("登山协会小程序", f"""
-      <div class="split">
-        <div class="media-card">{media_tag(f"../{paths['mini_mountain_video']}", "登山协会演示视频", poster=f"../{paths['mini_mountain_1']}")}<div><h4>演示视频</h4><p>围绕社团活动、公告、服务和个人中心组织信息展示。</p></div></div>
-        <div class="text-card"><h3>核心流程</h3><ul><li>首页聚合活动入口和协会信息。</li><li>活动、公告、服务和我的页面形成清晰导航。</li><li>适合展示轻量组织类小程序的信息架构和视觉落地。</li></ul></div>
+      <div class="feature-split">
+        <div class="picture-panel">
+          <div class="picture">{media_tag(f"../{paths['mini_mountain_video']}", "登山协会演示视频", poster=f"../{paths['mini_mountain_1']}")}</div>
+          <div class="picture-copy"><h3>演示视频</h3><p>围绕社团活动、公告、服务和个人中心组织信息展示。</p></div>
+        </div>
+        <div class="rich-copy">
+          <h3>社团活动与服务展示</h3>
+          <p>以活动浏览、协会公告、服务入口和个人页为核心，展示轻量组织类小程序的信息架构、视觉落地和内容组织能力。</p>
+          <ul><li>首页突出社团形象和活动入口。</li><li>活动页用于报名、查看行程与了解活动规则。</li><li>服务与公告模块承接社团运营信息。</li></ul>
+        </div>
       </div>
-      <div class="phone-grid" style="margin-top:14px">
-        {phone_cards(['mini_mountain_1','mini_mountain_2','mini_mountain_3','mini_mountain_4'], ['首页','活动','服务','公告'])}
+      <div class="phone-grid" style="margin-top:16px">
+        {phone_cards(paths, ['mini_mountain_1','mini_mountain_2','mini_mountain_3','mini_mountain_4'], ['首页','活动','服务','公告'])}
       </div>
     """)
     (PROJECTS_DIR / "miniapps.html").write_text(page_shell("微信小程序展示合集", "校园网约车、舒腰健脊与登山协会小程序", body, active="miniapps"), encoding="utf-8")
 
 
 def write_readme() -> None:
-    readme = """# 王俊松项目作品集
+    readme = """# 项目作品集
 
-这是一个 GitHub Pages 静态作品集站点，入口为 `index.html`。
+GitHub Pages 静态作品集站点，入口为 `index.html`。
 
 公开访问地址：
 
@@ -1054,7 +1562,7 @@ https://wjs2000.github.io/show/
 - AI健身动作识别与评分系统
 - 事件与情绪分析智能体 / ETF量化辅助系统
 - 铁路无人机视频全景拼接
-- 物流大数据垂直大模型应用原型
+- 物流大数据垂直大模型
 - 微信小程序展示合集
 """
     (REPO / "README.md").write_text(readme, encoding="utf-8")

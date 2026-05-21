@@ -1,4 +1,5 @@
 _preview_*.png
-.server.pid
+.server.*
+.edge-profile-*
 Thumbs.db
 .DS_Store

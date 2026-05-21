@@ -3,98 +3,152 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI健身动作识别与评分系统 | 王俊松项目作品集</title>
+  <title>AI健身动作识别与评分系统 | 项目作品集</title>
   <meta name="description" content="姿态估计、动作计数与运动反馈项目">
   <link rel="stylesheet" href="../assets/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="../index.html">王俊松 · 项目作品集</a>
-    <nav><a href="../index.html">作品集首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
+    <a class="brand" href="../index.html">项目作品集</a>
+    <nav><a href="../index.html">首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
   </header>
   <main>
-    
-    <section class="project-hero">
-      <div class="hero-copy">
-        <p class="kicker">实时姿态估计与运动反馈</p>
+    <section class="immersive-hero" style="--hero-image: url('../assets/images/fitness/blue-tech-hero.jpg')">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <p class="kicker">实时姿态估计 · 动作计数 · 运动反馈</p>
         <h1>AI健身动作识别与评分系统</h1>
-        <p class="lead">基于摄像头画面进行人体姿态估计、关键点提取、动作规则建模、自动计数和评分反馈，覆盖深蹲、俯卧撑、引体向上、仰卧起坐等运动场景。</p>
-        <div class="tag-row"><span>MediaPipe Pose</span><span>OpenCV</span><span>动作计数</span><span>运动健康</span></div>
+        <p class="lead">基于摄像头或视频输入进行人体关键点识别、关节角度计算、动作阶段判断、自动计数、评分和反馈展示。</p>
+        <div class="tag-row"><span>MediaPipe Pose</span><span>OpenCV</span><span>状态机计数</span><span>运动健康</span></div>
       </div>
-      <div class="hero-visual"><img class="" src="../assets/images/fitness/home.jpg" alt="AI健身首页图" loading="lazy"></div>
     </section>
-    <section class="section "><div class="section-title"><h2>项目展示</h2></div>
-      <div class="media-grid two">
-        
-    <article class="media-card">
-      <img class="" src="../assets/media/fitness/squat-demo.gif" alt="深蹲识别动图" loading="lazy">
-      <div>
-        <h4>深蹲识别动图</h4>
-        <p>实时骨架叠加、角度判断和计数反馈。</p>
-      </div>
-    </article>
     
-        
-    <article class="media-card">
-      <img class="" src="../assets/media/fitness/pushup-demo.gif" alt="俯卧撑识别动图" loading="lazy">
-      <div>
-        <h4>俯卧撑识别动图</h4>
-        <p>通过阶段状态机降低单帧阈值误触发。</p>
-      </div>
-    </article>
-    
-      </div>
-    </section><section class="section "><div class="section-title"><h2>动作截图</h2></div>
-      <div class="media-grid">
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/fitness/fitness_squat.jpg" alt="深蹲" loading="lazy">
-      <div>
-        <h4>深蹲</h4>
+    <section class="section ">
+      <div class="section-heading">
+        <h2>核心流程</h2>
         
       </div>
-    </article>
-    
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/fitness/fitness_pushup.jpg" alt="俯卧撑" loading="lazy">
-      <div>
-        <h4>俯卧撑</h4>
-        
-      </div>
-    </article>
-    
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/fitness/fitness_pullup.jpg" alt="引体向上" loading="lazy">
-      <div>
-        <h4>引体向上</h4>
-        
-      </div>
-    </article>
-    
-        
-    <article class="media-card">
-      <img class="" src="../assets/images/fitness/fitness_situp.jpg" alt="仰卧起坐" loading="lazy">
-      <div>
-        <h4>仰卧起坐</h4>
-        
-      </div>
-    </article>
-    
-      </div>
-    </section><section class="section "><div class="section-title"><h2>识别链路</h2></div>
+      
       <div class="process">
-        <div><strong>1. 视频输入</strong><span>摄像头或本地视频作为实时/离线处理入口。</span></div>
-        <div><strong>2. 姿态估计</strong><span>提取肩、肘、腕、髋、膝、踝等关键点。</span></div>
-        <div><strong>3. 规则判别</strong><span>用关节角度、动作阶段和状态机完成计数。</span></div>
-        <div><strong>4. 反馈展示</strong><span>叠加骨架、分数、次数、热量和训练反馈。</span></div>
+        <div><strong>视频输入</strong><span>摄像头或本地 MP4 由 OpenCV 逐帧读取。</span></div>
+        <div><strong>姿态估计</strong><span>提取肩、肘、腕、髋、膝、踝等人体关键点。</span></div>
+        <div><strong>规则判别</strong><span>通过关节角度和 up/down 阶段状态完成动作计数。</span></div>
+        <div><strong>反馈展示</strong><span>将骨架、分数、次数、平均分和即时反馈叠加到画面。</span></div>
       </div>
+    
     </section>
-  </main>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>动作识别动图</h2>
+        <p>四类动作统一按等比缩放展示，保留视频画面中的骨架、计数和反馈信息。</p>
+      </div>
+      
+      <div class="gallery four">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/media/fitness/fitness_gif_squat.gif" alt="深蹲识别" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>深蹲识别</h3>
+        <p>膝关节与髋关节角度用于阶段判断。</p>
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/media/fitness/fitness_gif_pushup.gif" alt="俯卧撑识别" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>俯卧撑识别</h3>
+        <p>肩肘腕关键点用于计数和评分反馈。</p>
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/media/fitness/fitness_gif_pullup.gif" alt="引体向上识别" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>引体向上识别</h3>
+        <p>背面姿态画面中识别肩臂动作变化。</p>
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/media/fitness/fitness_gif_situp.gif" alt="仰卧起坐识别" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>仰卧起坐识别</h3>
+        <p>肩髋膝角度用于起身与躺下阶段判断。</p>
+      </div>
+    </article>
+    
+      </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>项目截图</h2>
+        
+      </div>
+      
+      <div class="gallery four">
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/fitness/fitness_squat.jpg" alt="深蹲截图" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>深蹲截图</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/fitness/fitness_pushup.jpg" alt="俯卧撑截图" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>俯卧撑截图</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/fitness/fitness_pullup.jpg" alt="引体向上截图" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>引体向上截图</h3>
+        
+      </div>
+    </article>
+    
+        
+    <article class="picture-panel ">
+      <div class="picture"><img src="../assets/images/fitness/fitness_situp.jpg" alt="仰卧起坐截图" loading="lazy"></div>
+      <div class="picture-copy">
+        <h3>仰卧起坐截图</h3>
+        
+      </div>
+    </article>
+    
+      </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>能力拆解</h2>
+        
+      </div>
+      
+      <div class="text-grid">
+        <article class="text-panel"><h3>视觉感知</h3><p>把实时视频画面转化为人体关键点序列，为动作判断提供稳定输入。</p></article>
+        <article class="text-panel"><h3>规则建模</h3><p>不同动作对应不同角度组合与阶段阈值，避免单帧误触发导致重复计数。</p></article>
+        <article class="text-panel"><h3>产品展示</h3><p>将分数、次数、热量和动作反馈组织到前端展示链路，形成可演示闭环。</p></article>
+      </div>
+    
+    </section>
+    </main>
   <footer class="site-footer">
-    <span>Portfolio for internship interviews</span>
-    <span>Computer Vision · Financial AI · RAG · Mini Programs</span>
+    <span>Computer Vision · Computational Imaging · Financial AI · RAG · Mini Programs</span>
   </footer>
   <script src="../assets/site.js"></script>
 </body>

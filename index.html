@@ -3,110 +3,117 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>项目作品集概览 | 王俊松项目作品集</title>
-  <meta name="description" content="王俊松项目作品集总览">
+  <title>项目作品集概览 | 项目作品集</title>
+  <meta name="description" content="计算机视觉、计算成像、金融智能、RAG 与微信小程序项目作品集">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="index.html">王俊松 · 项目作品集</a>
-    <nav><a href="index.html">作品集首页</a><a href="projects/avm-360.html">360环视</a><a href="projects/acaf-finance.html">AFAC金融</a><a href="projects/ai-fitness.html">AI健身</a><a href="projects/quant-agent.html">量化Agent</a><a href="projects/railway-stitching.html">铁路拼接</a><a href="projects/logistics-llm.html">物流大模型</a><a href="projects/miniapps.html">小程序合集</a></nav>
+    <a class="brand" href="index.html">项目作品集</a>
+    <nav><a href="index.html">首页</a><a href="projects/avm-360.html">360环视</a><a href="projects/acaf-finance.html">AFAC金融</a><a href="projects/ai-fitness.html">AI健身</a><a href="projects/quant-agent.html">量化Agent</a><a href="projects/railway-stitching.html">铁路拼接</a><a href="projects/logistics-llm.html">物流大模型</a><a href="projects/miniapps.html">小程序合集</a></nav>
   </header>
   <main>
-    
-    <section class="home-hero">
-      <div class="hero-copy">
+    <section class="immersive-hero home-immersive" data-hero-carousel>
+      <div class="hero-slides"><figure class="hero-slide is-active"><img src="assets/images/acaf/acaf_award.jpg" alt="" loading="eager"></figure><figure class="hero-slide "><img src="assets/images/acaf/acaf_trophy.jpg" alt="" loading="lazy"></figure><figure class="hero-slide "><img src="assets/images/acaf/acaf_roadshow.jpg" alt="" loading="lazy"></figure><figure class="hero-slide "><img src="assets/images/railway/final-panorama.jpg" alt="" loading="lazy"></figure><figure class="hero-slide "><img src="assets/images/quant/latest-prediction.jpg" alt="" loading="lazy"></figure></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-inner">
         <p class="kicker">Portfolio Overview</p>
-        <h1>王俊松项目作品集</h1>
-        <p class="lead">这里汇总我在计算机视觉、计算成像、金融智能、RAG 应用和微信小程序方向的代表项目。每个项目都保留关键截图、结果图和数据事实，便于快速了解项目目标、核心做法与可展示成果。</p>
+        <h1>项目作品集</h1>
+        <p class="lead">本项目集为计算机视觉、计算成像、金融智能、RAG 应用和微信小程序方向的代表项目。</p>
         <div class="tag-row">
-          <span>Computer Vision</span><span>Financial AI</span><span>RAG / Agent</span><span>Mini Program</span><span>Python / OpenCV / PyTorch</span>
+          <span>Computer Vision</span><span>Computational Imaging</span><span>Financial AI</span><span>RAG / Agent</span><span>Mini Program</span>
         </div>
       </div>
-      <div class="hero-visual">
-    <div class="home-visual-grid">
-      <img class="" src="assets/images/avm/avm_demo_bev.jpg" alt="360环视上机展示" loading="lazy">
-      <img class="" src="assets/images/quant/real-simulation.jpg" alt="量化真实模拟" loading="lazy">
-      <img class="" src="assets/images/miniapps/miniapp-collage.jpg" alt="小程序合集" loading="lazy">
-    </div>
-    </div>
+      <div class="hero-dots"><button class="is-active" aria-label="切换首屏图 1"></button><button class="" aria-label="切换首屏图 2"></button><button class="" aria-label="切换首屏图 3"></button><button class="" aria-label="切换首屏图 4"></button><button class="" aria-label="切换首屏图 5"></button></div>
     </section>
-    <section class="section "><div class="section-title"><h2>项目总览</h2></div><div class="project-grid">
-        <a class="project-card" href="projects/avm-360.html">
-          <img class="" src="assets/images/avm/avm_demo_bev.jpg" alt="360车载全景影像拼接" loading="lazy">
-          <div class="project-card-body">
-            <h3>360车载全景影像拼接</h3>
-            <p>工程车辆四路鱼眼相机 BEV 拼接，上机演示与多尺度环视输出。</p>
-            <div class="card-meta"><span>OpenCV</span><span>BEV</span><span>标定</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        
-        <a class="project-card" href="projects/acaf-finance.html">
-          <img class="" src="assets/images/acaf/acaf_award.jpg" alt="ACAF2025金融智能创新大赛" loading="lazy">
-          <div class="project-card-body">
-            <h3>ACAF2025金融智能创新大赛</h3>
-            <p>基金申赎 7 日预测，三等奖，覆盖数据工程、特征融合和 LSTM-Attention。</p>
-            <div class="card-meta"><span>PyTorch</span><span>金融预测</span><span>竞赛</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        
-        <a class="project-card" href="projects/ai-fitness.html">
-          <img class="" src="assets/media/fitness/squat-demo.gif" alt="AI健身动作识别与评分" loading="lazy">
-          <div class="project-card-body">
-            <h3>AI健身动作识别与评分</h3>
-            <p>基于摄像头姿态估计、关键点规则、自动计数与运动反馈的视觉原型。</p>
-            <div class="card-meta"><span>MediaPipe</span><span>OpenCV</span><span>运动健康</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        
-        <a class="project-card" href="projects/quant-agent.html">
-          <img class="" src="assets/images/quant/real-simulation.jpg" alt="事件与情绪分析 / ETF量化辅助" loading="lazy">
-          <div class="project-card-body">
-            <h3>事件与情绪分析 / ETF量化辅助</h3>
-            <p>多因子 ETF 轮动模拟盘，叠加新闻、公告和社区情绪的信息增强层。</p>
-            <div class="card-meta"><span>ETF</span><span>Agent</span><span>机器学习</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        
-        <a class="project-card" href="projects/railway-stitching.html">
-          <img class="" src="assets/images/railway/final-panorama.jpg" alt="铁路无人机全景拼接" loading="lazy">
-          <div class="project-card-body">
-            <h3>铁路无人机全景拼接</h3>
-            <p>从铁路巡检视频抽帧、配准到全景底图生成，服务工业视觉预处理。</p>
-            <div class="card-meta"><span>SIFT</span><span>RANSAC</span><span>无人机</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        
-        <a class="project-card" href="projects/logistics-llm.html">
-          <img class="" src="assets/images/logistics/log_dashboard.jpg" alt="物流大数据垂直大模型" loading="lazy">
-          <div class="project-card-body">
-            <h3>物流大数据垂直大模型</h3>
-            <p>RAG + 工具调用 + 数据分析 Skills，覆盖运价、路径、风险和自动周报。</p>
-            <div class="card-meta"><span>RAG</span><span>Streamlit</span><span>物流</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        
-        <a class="project-card" href="projects/miniapps.html">
-          <img class="" src="assets/images/miniapps/miniapp-collage.jpg" alt="微信小程序展示合集" loading="lazy">
-          <div class="project-card-body">
-            <h3>微信小程序展示合集</h3>
-            <p>校园网约车、舒腰健脊、登山协会三个小程序的产品与工程展示。</p>
-            <div class="card-meta"><span>小程序</span><span>Vue</span><span>产品原型</span></div>
-            <span class="button-link">查看项目详情</span>
-          </div>
-        </a>
-        </div></section>
     
-  </main>
+    <section class="section ">
+      <div class="section-heading">
+        <h2>代表项目</h2>
+        <p>以项目目标、关键做法和可视化成果为主线组织，首页保留静态展示，详细页展开完整材料。</p>
+      </div>
+      <div class="portfolio-stack">
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/avm-360.html"><img src="assets/images/avm/avm_demo_bev.jpg" alt="360车载全景影像拼接" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">01</div>
+            <h3>360车载全景影像拼接</h3>
+            <p>四路鱼眼相机输入、BEV 几何映射、区域融合与上机实测，补充低延迟视频流处理升级。</p>
+            <div class="tag-row"><span>OpenCV</span><span>Fisheye</span><span>BEV</span></div>
+            <a class="link-button" href="projects/avm-360.html">查看项目</a>
+          </div>
+        </article>
+        
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/acaf-finance.html"><img src="assets/images/acaf/acaf_award.jpg" alt="AFAC2025金融智能创新大赛" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">02</div>
+            <h3>AFAC2025金融智能创新大赛</h3>
+            <p>20 只基金未来 7 天申购与赎回预测，多源特征工程与 LSTM-Attention 双通道建模。</p>
+            <div class="tag-row"><span>PyTorch</span><span>时间序列</span><span>金融智能</span></div>
+            <a class="link-button" href="projects/acaf-finance.html">查看项目</a>
+          </div>
+        </article>
+        
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/ai-fitness.html"><img src="assets/images/fitness/fitness-strip.jpg" alt="AI健身动作识别与评分系统" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">03</div>
+            <h3>AI健身动作识别与评分系统</h3>
+            <p>摄像头姿态估计、关节角度状态机、动作计数、评分与训练反馈展示。</p>
+            <div class="tag-row"><span>MediaPipe</span><span>OpenCV</span><span>运动健康</span></div>
+            <a class="link-button" href="projects/ai-fitness.html">查看项目</a>
+          </div>
+        </article>
+        
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/quant-agent.html"><img src="assets/images/quant/real-simulation.jpg" alt="事件与情绪分析智能体 / ETF量化辅助系统" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">04</div>
+            <h3>事件与情绪分析智能体 / ETF量化辅助系统</h3>
+            <p>ETF 横截面轮动主引擎结合事件新闻情绪层，用于候选排序、解释和模拟调仓。</p>
+            <div class="tag-row"><span>ETF轮动</span><span>Agent</span><span>模拟决策</span></div>
+            <a class="link-button" href="projects/quant-agent.html">查看项目</a>
+          </div>
+        </article>
+        
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/railway-stitching.html"><img src="assets/images/railway/final-panorama.jpg" alt="铁路无人机视频全景拼接" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">05</div>
+            <h3>铁路无人机视频全景拼接</h3>
+            <p>从连续无人机视频帧生成铁路场景全景底图，支撑巡检场景的大视野观察。</p>
+            <div class="tag-row"><span>SIFT</span><span>RANSAC</span><span>全景拼接</span></div>
+            <a class="link-button" href="projects/railway-stitching.html">查看项目</a>
+          </div>
+        </article>
+        
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/logistics-llm.html"><img src="assets/images/logistics/log_dashboard.jpg" alt="物流大数据垂直大模型" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">06</div>
+            <h3>物流大数据垂直大模型</h3>
+            <p>RAG 知识库、物流领域工具调用、路径优化、风险预警与自动周报工作台。</p>
+            <div class="tag-row"><span>RAG</span><span>Streamlit</span><span>路径优化</span></div>
+            <a class="link-button" href="projects/logistics-llm.html">查看项目</a>
+          </div>
+        </article>
+        
+        <article class="showcase-item">
+          <a class="showcase-media" href="projects/miniapps.html"><img src="assets/images/miniapps/miniapp-collage.jpg" alt="微信小程序展示合集" loading="lazy"></a>
+          <div class="showcase-copy">
+            <div class="num">07</div>
+            <h3>微信小程序展示合集</h3>
+            <p>校园网约车、舒腰健脊、登山协会三个小程序，展示产品流程与前端实现能力。</p>
+            <div class="tag-row"><span>微信小程序</span><span>Vue</span><span>产品原型</span></div>
+            <a class="link-button" href="projects/miniapps.html">查看项目</a>
+          </div>
+        </article>
+        </div>
+    </section>
+    </main>
   <footer class="site-footer">
-    <span>Portfolio for internship interviews</span>
-    <span>Computer Vision · Financial AI · RAG · Mini Programs</span>
+    <span>Computer Vision · Computational Imaging · Financial AI · RAG · Mini Programs</span>
   </footer>
   <script src="assets/site.js"></script>
 </body>
