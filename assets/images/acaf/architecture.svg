@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="560" viewBox="0 0 1180 560">
+  <style>
+    .bg { fill: #f7f9fb; }
+    .box { fill: #ffffff; stroke: #345; stroke-width: 1.4; rx: 10; }
+    .stage { fill: #0f4c81; font: 700 20px "Microsoft YaHei", sans-serif; }
+    .text { fill: #1f2933; font: 15px "Microsoft YaHei", sans-serif; }
+    .small { fill: #52606d; font: 13px "Microsoft YaHei", sans-serif; }
+    .arrow { stroke: #566; stroke-width: 2.2; marker-end: url(#arrow); fill: none; }
+    .pill { fill: #e8f1f8; stroke: #8fb4d2; stroke-width: 1; rx: 16; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#566" />
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1180" height="560"/>
+  <rect class="box" x="40" y="70" width="210" height="185"/>
+  <text class="stage" x="65" y="110">数据来源</text>
+  <text class="text" x="65" y="145">赛方申赎与曝光数据</text>
+  <text class="text" x="65" y="173">天天基金评论</text>
+  <text class="text" x="65" y="201">百度指数与市场指数</text>
+  <text class="text" x="65" y="229">大模型生成特征</text>
+  <rect class="box" x="315" y="45" width="250" height="240"/>
+  <text class="stage" x="340" y="85">特征工程</text>
+  <text class="text" x="340" y="120">按基金代码拆分与合并</text>
+  <text class="text" x="340" y="148">星期权重、节假日</text>
+  <text class="text" x="340" y="176">基金属性与指数映射</text>
+  <text class="text" x="340" y="204">情绪热度、发薪收盘</text>
+  <text class="small" x="340" y="238">输出：train_set.csv</text>
+  <rect class="box" x="630" y="70" width="230" height="185"/>
+  <text class="stage" x="655" y="110">数据加载</text>
+  <text class="text" x="655" y="145">20只基金分组</text>
+  <text class="text" x="655" y="173">7天历史窗口</text>
+  <text class="text" x="655" y="201">预测未来7天</text>
+  <text class="small" x="655" y="229">全局标准化特征</text>
+  <rect class="box" x="920" y="45" width="220" height="240"/>
+  <text class="stage" x="945" y="85">模型与输出</text>
+  <text class="text" x="945" y="120">申购/赎回双通道</text>
+  <text class="text" x="945" y="148">LSTM + 多头注意力</text>
+  <text class="text" x="945" y="176">加权 WMAPE 损失</text>
+  <text class="text" x="945" y="204">3次运行取平均</text>
+  <text class="small" x="945" y="238">输出：predict_result.csv</text>
+  <path class="arrow" d="M250 160 C275 160,290 160,315 160"/>
+  <path class="arrow" d="M565 160 C590 160,605 160,630 160"/>
+  <path class="arrow" d="M860 160 C885 160,895 160,920 160"/>
+  <rect class="pill" x="100" y="350" width="240" height="58"/>
+  <text class="text" x="120" y="384">9,460行 / 18列 / 20只基金</text>
+  <rect class="pill" x="470" y="350" width="270" height="58"/>
+  <text class="text" x="493" y="384">训练张量：(9120, 7, 9)</text>
+  <rect class="pill" x="820" y="350" width="260" height="58"/>
+  <text class="text" x="846" y="384">预测结果：140行</text>
+  <text class="small" x="52" y="505">说明：本图依据本轮读取到的代码与结果文件生成，未包含未提交的线上榜单或私有权重。</text>
+</svg>

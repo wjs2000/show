@@ -1,0 +1,4 @@
+_preview_*.png
+.server.pid
+Thumbs.db
+.DS_Store
