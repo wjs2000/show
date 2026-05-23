@@ -21,6 +21,7 @@ ASSETS = REPO / "assets"
 PROJECTS_DIR = REPO / "projects"
 
 SOURCE_ROOT = Path(r"G:\云南财经大学\工作实习\项目文档")
+ASSET_VERSION = "20260523_quant_layout"
 
 
 def ensure_clean() -> None:
@@ -607,7 +608,7 @@ def page_shell(title: str, subtitle: str, body: str, active: str = "") -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{esc(title)} | 项目作品集</title>
   <meta name="description" content="{esc(subtitle)}">
-  <link rel="stylesheet" href="{prefix}assets/styles.css">
+  <link rel="stylesheet" href="{prefix}assets/styles.css?v={ASSET_VERSION}">
 </head>
 <body>
   <header class="site-header">
@@ -618,7 +619,7 @@ def page_shell(title: str, subtitle: str, body: str, active: str = "") -> str:
   <footer class="site-footer">
     <span>Computer Vision · Computational Imaging · Financial AI · RAG · Mini Programs</span>
   </footer>
-  <script src="{prefix}assets/site.js"></script>
+  <script src="{prefix}assets/site.js?v={ASSET_VERSION}"></script>
 </body>
 </html>
 """
@@ -1031,6 +1032,8 @@ h1 {
   font-size: clamp(25px, 3vw, 38px);
   color: #125477;
   line-height: 1.08;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .metric span {
   display: block;
@@ -1095,6 +1098,107 @@ h1 {
   height: auto;
   object-fit: contain;
   background: #0e171d;
+}
+.sequence-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.sequence-step {
+  position: relative;
+  min-height: 170px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(245, 250, 251, .96));
+  box-shadow: 0 12px 30px rgba(16, 31, 40, .06);
+  overflow: hidden;
+}
+.sequence-step::after {
+  content: "";
+  position: absolute;
+  inset: auto -20px -38px auto;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28, 130, 125, .16), transparent 68%);
+}
+.sequence-step span {
+  display: inline-flex;
+  color: var(--gold);
+  font-weight: 950;
+}
+.sequence-step h3 {
+  margin: 8px 0 8px;
+  font-size: 21px;
+  letter-spacing: 0;
+}
+.sequence-step p {
+  margin: 0;
+  color: var(--muted);
+}
+.workbench-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.46fr) minmax(320px, .54fr);
+  gap: 22px;
+  align-items: stretch;
+}
+.workbench-stage.reversed {
+  grid-template-columns: minmax(320px, .62fr) minmax(0, 1.38fr);
+}
+.stage-media {
+  min-height: 520px;
+  display: grid;
+  align-items: center;
+  padding: 18px;
+}
+.stage-media img,
+.stage-media video {
+  max-height: none;
+}
+.stage-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.stage-copy .eyebrow {
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-weight: 950;
+}
+.subsection-label {
+  margin: 28px 0 14px;
+  color: #102231;
+  font-size: 24px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+.evidence-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, .85fr) minmax(0, 1.15fr);
+  gap: 20px;
+  align-items: start;
+}
+.evidence-layout .sector-board {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.agent-summary {
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+  gap: 20px;
+  align-items: start;
+}
+.agent-summary .metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.agent-summary .metric strong {
+  font-size: clamp(24px, 2.4vw, 34px);
 }
 .process {
   display: grid;
@@ -1392,11 +1496,19 @@ h1 {
   .gallery.four,
   .text-grid,
   .process,
-  .metrics {
+  .metrics,
+  .sequence-strip,
+  .workbench-stage,
+  .workbench-stage.reversed,
+  .evidence-layout,
+  .risk-grid,
+  .agent-summary,
+  .agent-summary .metrics {
     grid-template-columns: 1fr;
   }
   .showcase-item:nth-child(even) .showcase-media { order: 0; }
   .showcase-media { min-height: 260px; }
+  .stage-media { min-height: 320px; }
   .phone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .phone-card img { height: 420px; }
   .fusion-map,
@@ -1727,11 +1839,30 @@ def write_quant(paths: dict[str, str]) -> None:
 
     body = immersive_hero(
         "事件与情绪分析智能体 / ETF量化辅助系统",
-        "横截面轮动模型 · 事件新闻情绪 Agent · 模拟决策",
-        "以 ETF 横截面轮动预测为主引擎，事件新闻情绪感知 Agent 作为信息增强层，把公开文本转成事件对象、板块情绪和 ETF 画像，用于解释候选、确认催化、降权噪声和复核风险。",
+        "ETF 横截面轮动 · 事件新闻情绪 Agent · 模拟决策工作台",
+        "页面按真实使用顺序展示：先由 ETF 量化工作台生成候选排序和模拟调仓，再由事件新闻情绪 Agent 读取公开信息，补充板块情绪、ETF 信息画像和风险复核线索。",
         f"../{paths['quant_bg']}",
-        ["ETF轮动", "事件新闻情绪Agent", "V2事件本体", "信息增强画像", "模拟调仓"],
+        ["ETF轮动", "多模型候选排序", "事件情绪Agent", "信息增强画像", "风险复核"],
     )
+    body += section("项目阅读路径", """
+      <div class="sequence-strip">
+        <article class="sequence-step">
+          <span>01 ETF 主系统</span>
+          <h3>先生成候选排序</h3>
+          <p>基于 ETF 日线面板和固定因子，输出未来 10 个交易日的候选 ETF、概率与策略目标。</p>
+        </article>
+        <article class="sequence-step">
+          <span>02 模拟与评估</span>
+          <h3>再观察策略表现</h3>
+          <p>从指定观察日开始滚动调仓，结合 Top3 概率和模型评估图验证工作台输出。</p>
+        </article>
+        <article class="sequence-step">
+          <span>03 情绪 Agent</span>
+          <h3>最后补充解释和风险</h3>
+          <p>把新闻、披露、政策和社区评论转成事件对象，连接到板块与 ETF 画像中。</p>
+        </article>
+      </div>
+    """, subtitle="这里不是把两个项目简单并排，而是把量化候选、事件解释和风险复核放到同一条工作流里。")
     body += section("系统数据", metric_cards([
         ("ETF 因子记录", "62,835 行"),
         ("量化交易日", "1,781 个"),
@@ -1740,99 +1871,126 @@ def write_quant(paths: dict[str, str]) -> None:
         ("板块状态", f"{summary['counts']['sector_states_v2']} 个"),
         ("ETF信息画像", f"{summary['counts']['etf_overlays_v2']} 个"),
     ]))
-    body += section("双引擎融合逻辑", """
-      <div class="fusion-map">
-        <article class="fusion-panel">
-          <h3>量化主引擎</h3>
-          <p>用 ETF 日线面板、46 个固定因子和多模型输出形成候选排序。</p>
+    body += section("ETF 量化工作台", f"""
+      <div class="workbench-stage">
+        <div class="wide-media stage-media">{media_tag(f"../{paths['quant_latest']}", "ETF 量化工作台最新预测界面")}</div>
+        <div class="rich-copy stage-copy">
+          <p class="eyebrow">第一层：候选排序</p>
+          <h3>先回答“哪些 ETF 值得进入观察池”</h3>
+          <p>工作台以 ETF 日线面板为基础，结合 46 个固定因子和多模型输出，形成横截面候选排序。界面保留预测日期、训练区间、模型结果、概率和策略目标，方便从候选池进入后续模拟。</p>
           <ul>
             <li>预测未来 10 个交易日相对候选池中位数的强弱。</li>
-            <li>输出候选 ETF、概率、策略目标和滚动调仓模拟。</li>
-            <li>负责“先把可交易候选排出来”。</li>
-          </ul>
-        </article>
-        <article class="fusion-panel fusion-center">
-          <div><strong>排序 + 解释</strong><span>确认催化 · 风险复核 · 决策观察</span></div>
-        </article>
-        <article class="fusion-panel">
-          <h3>事件情绪 Agent</h3>
-          <p>把新闻、政策、披露和社区评论转成可追溯的信息增强信号。</p>
-          <ul>
-            <li>生成事件对象、板块情绪和 ETF 信息增强画像。</li>
-            <li>用于解释模型候选背后的信息变化。</li>
-            <li>负责“说明为什么该看、哪里要谨慎”。</li>
-          </ul>
-        </article>
-      </div>
-    """, subtitle="两个模块的分工不是并列展示，而是前后承接：量化模型负责排序，事件 Agent 负责解释、确认和风险复核。")
-    body += section("工作台展示", f"""
-      <div class="feature-split">
-        <div class="wide-media">{media_tag(f"../{paths['quant_latest']}", "最新预测界面")}</div>
-        <div class="rich-copy">
-          <h3>从预测候选到可解释观察</h3>
-          <p>量化工作台输出候选 ETF 和模拟策略，事件 Agent 将当日公开信息映射到 ETF 主题上，形成“候选排序 + 信息画像 + 风险复核”的组合视图。</p>
-          <ul>
-            <li>模型输出解决“谁排在前面”。</li>
-            <li>事件画像解释“当日信息为什么支持或削弱”。</li>
-            <li>风险分用于识别需要人工复核的主题，避免只看正向概率。</li>
+            <li>输出候选 ETF、模型概率、主题方向和可观察排序。</li>
+            <li>作为后续事件解释的入口，而不是孤立展示一张预测表。</li>
           </ul>
         </div>
       </div>
     """)
-    body += section("事件 Agent 架构", f"""
-      <div class="feature-split">
-        <div class="wide-media">{media_tag(f"../{paths['agent_arch']}", "事件新闻情绪 Agent 架构")}</div>
-        <div class="rich-copy">
-          <h3>规则主链路 + LLM 结构化增强</h3>
-          <p>Agent 采用固定 Workflow：真实公开来源进入数据获取、清洗过滤、去重聚类、统一证据对象、可选 LLM 结构化、事件融合、板块情绪和 ETF 信息增强画像。</p>
+    body += section("预测与模拟", f"""
+      <div class="workbench-stage reversed">
+        <div class="rich-copy stage-copy">
+          <p class="eyebrow">第二层：模拟验证</p>
+          <h3>把模型候选放进滚动调仓场景</h3>
+          <p>从一个观察日开始，按所选策略每 10 个交易日滚动调仓，观察模拟资金曲线变化。这个部分展示的是量化主系统本身的输出能力，为事件 Agent 的解释层提供明确承接对象。</p>
           <ul>
-            <li>数据源包括财经新闻、专业披露与会议纪要、基金社区评论等公开信息。</li>
-            <li>V2 事件本体统一映射政策、宏观、产业、披露、地缘、媒体和社区情绪。</li>
-            <li>LLM 失败时不阻断主流程，分析层按规则结果兜底完成。</li>
+            <li>真实模拟图展示策略滚动后的资金变化。</li>
+            <li>Top3 概率图用于检查候选排序的集中度。</li>
+            <li>模型评估图用于对比不同模型在测试集上的表现。</li>
           </ul>
         </div>
+        <div class="wide-media stage-media">{media_tag(f"../{paths['quant_sim']}", "ETF 真实模拟调仓曲线")}</div>
       </div>
-    """)
-    body += section("事件批次实证", metric_cards([
-        ("运行批次", str(summary["batch_id"])),
-        ("运行日期", str(summary["run_date"])),
-        ("财经新闻", f"{summary['source_module_counts']['财经新闻']:,} 条"),
-        ("专业披露", f"{summary['source_module_counts']['专业披露与会议纪要']:,} 条"),
-        ("社区评论", f"{summary['source_module_counts']['基金社区评论']:,} 条"),
-        ("非零影响事件", f"{summary['counts']['nonzero_events_v2']:,} 个"),
-        ("正向/负向事件", f"{summary['counts']['positive_events_v2']} / {summary['counts']['negative_events_v2']}"),
-        ("平均置信度", safe_float(summary["counts"]["avg_event_confidence"], 4)),
-    ]))
-    body += section("预测与模拟结果", f"""
-      <div class="gallery">
-        {picture_panel(f"../{paths['quant_sim']}", "真实模拟", "从一个观察日开始，按所选策略每10个交易日滚动调仓，模拟资金变化。")}
+      <div class="gallery three" style="margin-top:22px">
         {picture_panel(f"../{paths['quant_top3']}", "最新 Top3 概率")}
         {picture_panel(f"../{paths['quant_eval']}", "模型评估示例")}
         {picture_panel(f"../{paths['quant_old_auc']}", "测试集 AUC 源图")}
       </div>
     """)
-    body += section("影响通道分布", f"""
+    body += section("事件新闻情绪 Agent", f"""
+      <div class="agent-summary">
+        <div>
+          {metric_cards([
+              ("运行批次", str(summary["batch_id"])),
+              ("运行日期", str(summary["run_date"])),
+              ("非零影响事件", f"{summary['counts']['nonzero_events_v2']:,} 个"),
+              ("正向/负向事件", f"{summary['counts']['positive_events_v2']} / {summary['counts']['negative_events_v2']}"),
+              ("平均置信度", safe_float(summary["counts"]["avg_event_confidence"], 4)),
+              ("公开信息源", f"{summary['source_module_counts']['财经新闻'] + summary['source_module_counts']['专业披露与会议纪要'] + summary['source_module_counts']['基金社区评论']:,} 条"),
+          ])}
+        </div>
+        <div class="rich-copy">
+          <h3>把公开文本转成可接入量化结果的信息层</h3>
+          <p>Agent 读取财经新闻、专业披露与会议纪要、基金社区评论等公开信息，经过获取、清洗、去重聚类、事件结构化和统一证据对象，生成可追溯的板块情绪与 ETF 信息增强画像。</p>
+          <ul>
+            <li>事件本体统一映射政策、宏观、产业、披露、地缘、媒体和社区情绪。</li>
+            <li>规则主链路稳定生成结构化结果，LLM 作为可选增强用于摘要和归因。</li>
+            <li>输出目标是解释量化候选、确认催化和提示需要复核的风险。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="wide-media stage-media" style="margin-top:22px">{media_tag(f"../{paths['agent_arch']}", "事件新闻情绪 Agent 架构")}</div>
+    """, subtitle="这一层放在量化结果之后出现：它不替代模型排序，而是解释排序背后的当日信息结构。")
+    body += section("事件来源与影响通道", f"""
+      <div class="metrics">
+        <div class="metric"><strong>{summary['source_module_counts']['财经新闻']:,} 条</strong><span>财经新闻</span></div>
+        <div class="metric"><strong>{summary['source_module_counts']['专业披露与会议纪要']:,} 条</strong><span>专业披露与会议纪要</span></div>
+        <div class="metric"><strong>{summary['source_module_counts']['基金社区评论']:,} 条</strong><span>基金社区评论</span></div>
+        <div class="metric"><strong>{summary['counts']['raw_records']:,} 条</strong><span>公开信息总量</span></div>
+      </div>
+      <h3 class="subsection-label">影响通道分布</h3>
       <div class="channel-grid">{channel_html}</div>
     """, subtitle="事件对象按影响通道进入后续聚合，媒体叙事提供高频线索，披露、政策和产业事件用于增强置信与解释。")
-    body += section("板块情绪状态", f"""
-      <div class="sector-board">{sector_html}</div>
-    """, subtitle="板块状态把事件对象从新闻粒度聚合到可与 ETF 主题承接的层级。")
-    body += section("ETF 信息增强画像", f"""
-      <div class="etf-grid">{etf_html}</div>
-    """, subtitle="这些画像不是收益预测，而是把当日事件与情绪映射到 ETF 候选，用于解释量化候选背后的信息结构。")
-    body += section("风险复核清单", f"""
-      <div class="etf-grid">{risk_html}</div>
-    """, subtitle="风险分用于提示候选之外的负向事件压力，尤其适合在模拟决策前做人工复核。")
-    body += section("代表事件链路", f"""
-      <div class="event-timeline">{event_html}</div>
-    """, subtitle="事件保留事件类型、影响通道、影响分和置信度，可从 ETF 画像继续回溯到证据包和原始来源。")
-    body += section("融合后的决策位置", """
-      <div class="text-grid">
-        <article class="text-panel"><h3>排序层</h3><p>量化模型根据历史因子和相对强弱标签生成候选 ETF 排序。</p></article>
-        <article class="text-panel"><h3>解释层</h3><p>事件 Agent 给出板块催化、信息分、风险分和当日变化原因。</p></article>
-        <article class="text-panel"><h3>复盘层</h3><p>模拟调仓后可以回看当日模型信号与事件证据是否一致，形成可复盘闭环。</p></article>
+    body += section("情绪到画像", f"""
+      <div class="evidence-layout">
+        <div class="rich-copy">
+          <h3>先聚合到板块，再映射到候选 ETF</h3>
+          <p>Agent 不直接把单条新闻贴到 ETF 上，而是先形成板块状态，再根据主题映射关系把信息分、风险分和当日变化原因写入 ETF 画像。这样量化工作台的候选结果就有了可解释的信息侧视图。</p>
+          <ul>
+            <li>板块层：展示日度分、事件活跃度和主要信息来源。</li>
+            <li>ETF 层：展示信息分、风险分、覆盖状态和代表性变化原因。</li>
+            <li>证据层：可继续回溯到代表事件摘要、影响通道和置信度。</li>
+          </ul>
+        </div>
+        <div class="sector-board">{sector_html}</div>
       </div>
-      <div class="notice-strip" style="margin-top:16px">展示批次 20260507_002 的状态为 partial_success_llm_timeout：数据采集、处理层和分析层已完成，LLM 结构化阶段超时后按规则链路兜底。页面将其表述为“规则主链路 + 可选 LLM 增强”，不宣称完整 LLM 闭环或投资建议。</div>
+      <h3 class="subsection-label">ETF 信息增强画像</h3>
+      <div class="etf-grid">{etf_html}</div>
+    """)
+    body += section("风险与事件", f"""
+      <div class="evidence-layout">
+        <div>
+          <h3 class="subsection-label" style="margin-top:0">风险复核清单</h3>
+          <div class="risk-grid">{risk_html}</div>
+        </div>
+        <div>
+          <h3 class="subsection-label" style="margin-top:0">代表事件链路</h3>
+          <div class="event-timeline">{event_html}</div>
+        </div>
+      </div>
+    """, subtitle="量化系统给出候选，事件 Agent 负责把支持因素和负向压力同时放到台面上，便于复盘和人工判断。")
+    body += section("融合后的决策闭环", """
+      <div class="fusion-map">
+        <article class="fusion-panel">
+          <h3>ETF 排序层</h3>
+          <p>由历史因子、横截面标签和多模型结果生成候选池。</p>
+          <ul>
+            <li>回答“先看哪些 ETF”。</li>
+            <li>沉淀为预测表、概率和模拟调仓记录。</li>
+          </ul>
+        </article>
+        <article class="fusion-panel fusion-center">
+          <div><strong>候选<br>画像<br>复核</strong><span>从模型输出走向可解释观察</span></div>
+        </article>
+        <article class="fusion-panel">
+          <h3>事件解释层</h3>
+          <p>把当日公开信息压缩成板块情绪、ETF 画像和风险线索。</p>
+          <ul>
+            <li>回答“为什么值得看”。</li>
+            <li>提示“哪里需要谨慎”。</li>
+          </ul>
+        </article>
+      </div>
+      <div class="notice-strip" style="margin-top:16px">展示批次采用规则主链路稳定生成结构化结果，LLM 结构化作为可选增强；当外部模型不可用时，板块状态、ETF 信息画像和风险复核仍按规则链路输出。</div>
     """)
     (PROJECTS_DIR / "quant-agent.html").write_text(page_shell("事件与情绪分析智能体 / ETF量化辅助系统", "ETF 轮动、事件情绪和模拟决策系统", body, active="quant"), encoding="utf-8")
 
