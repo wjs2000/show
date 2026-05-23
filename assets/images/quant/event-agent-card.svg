@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <rect width="1200" height="675" fill="#172033"/>
+  <rect x="46" y="46" width="1108" height="583" rx="16" fill="#ffffff"/>
+  <text x="86" y="118" font-family="Microsoft YaHei, Arial" font-size="42" font-weight="800" fill="#18202a">FundLook 事件新闻情绪感知 Agent</text>
+  <text x="86" y="164" font-family="Microsoft YaHei, Arial" font-size="22" fill="#5d6875">面向 ETF 轮动研究的真实公开信息增强层，不输出投资建议</text>
+  <g transform="translate(86,220)">
+    <g transform="translate(0,0)">
+      <rect width="230" height="132" rx="12" fill="#f4f7fb" stroke="#dbe2ea"/>
+      <text x="24" y="42" font-family="Microsoft YaHei, Arial" font-size="18" fill="#5d6875">原始记录</text>
+      <text x="24" y="98" font-family="Microsoft YaHei, Arial" font-size="40" font-weight="800" fill="#2563eb">7419</text>
+    </g>
+    <g transform="translate(270,0)">
+      <rect width="230" height="132" rx="12" fill="#f4f7fb" stroke="#dbe2ea"/>
+      <text x="24" y="42" font-family="Microsoft YaHei, Arial" font-size="18" fill="#5d6875">V2事件对象</text>
+      <text x="24" y="98" font-family="Microsoft YaHei, Arial" font-size="40" font-weight="800" fill="#2563eb">2145</text>
+    </g>
+    <g transform="translate(540,0)">
+      <rect width="230" height="132" rx="12" fill="#f4f7fb" stroke="#dbe2ea"/>
+      <text x="24" y="42" font-family="Microsoft YaHei, Arial" font-size="18" fill="#5d6875">板块状态</text>
+      <text x="24" y="98" font-family="Microsoft YaHei, Arial" font-size="40" font-weight="800" fill="#2563eb">14</text>
+    </g>
+    <g transform="translate(810,0)">
+      <rect width="230" height="132" rx="12" fill="#f4f7fb" stroke="#dbe2ea"/>
+      <text x="24" y="42" font-family="Microsoft YaHei, Arial" font-size="18" fill="#5d6875">ETF画像</text>
+      <text x="24" y="98" font-family="Microsoft YaHei, Arial" font-size="40" font-weight="800" fill="#2563eb">20</text>
+    </g>
+  </g>
+  <rect x="86" y="410" width="1028" height="96" rx="10" fill="#f4f7fb" stroke="#dbe2ea"/>
+  <text x="116" y="449" font-family="Microsoft YaHei, Arial" font-size="22" font-weight="700" fill="#18202a">技术关键词</text>
+  <text x="116" y="486" font-family="Microsoft YaHei, Arial" font-size="18" fill="#334155">数据源治理 · 去重聚类 · 事件本体 V2 · 规则评分 · LLM 结构化增强 · 失败回退 · 证据追踪</text>
+  <text x="86" y="570" font-family="Microsoft YaHei, Arial" font-size="18" fill="#5d6875">展示批次：20260507_002；状态：partial_success_llm_timeout；M7 回归测试：15 项通过。</text>
+</svg>

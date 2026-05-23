@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import csv
 import html
+import ast
+import json
 import math
 import os
 import shutil
@@ -352,6 +354,63 @@ def draw_quant_background(dest_rel: str) -> Path:
     return dest
 
 
+def draw_quant_agent_background(dest_rel: str) -> Path:
+    dest = slug_path(dest_rel)
+    w, h = 1800, 980
+    im = Image.new("RGB", (w, h), (7, 14, 19))
+    draw = ImageDraw.Draw(im, "RGBA")
+    for x in range(0, w, 88):
+        draw.line([(x, 0), (x, h)], fill=(206, 236, 235, 16), width=1)
+    for y in range(70, h, 86):
+        draw.line([(0, y), (w, y)], fill=(206, 236, 235, 13), width=1)
+
+    rng = np.random.default_rng(7)
+    price = 510
+    x = 820
+    for _ in range(34):
+        open_p = price + int(rng.normal(0, 22))
+        close_p = open_p + int(rng.normal(0, 35))
+        high = max(open_p, close_p) + int(rng.uniform(12, 50))
+        low = min(open_p, close_p) - int(rng.uniform(12, 50))
+        color = (230, 86, 82, 165) if close_p >= open_p else (35, 188, 124, 165)
+        y_high = h - high
+        y_low = h - low
+        y_open = h - open_p
+        y_close = h - close_p
+        draw.line([(x, y_high), (x, y_low)], fill=color, width=3)
+        draw.rounded_rectangle((x - 13, min(y_open, y_close), x + 13, max(y_open, y_close)), radius=3, fill=color)
+        price = close_p
+        x += 29
+
+    nodes = [
+        (1040, 280, "新闻"),
+        (1260, 215, "政策"),
+        (1460, 340, "披露"),
+        (1360, 560, "社区"),
+        (1090, 650, "ETF"),
+        (840, 470, "模型"),
+        (1550, 690, "风险"),
+    ]
+    for i, (x1, y1, _) in enumerate(nodes):
+        for x2, y2, _ in nodes[i + 1 :]:
+            d = math.dist((x1, y1), (x2, y2))
+            if d < 440:
+                draw.line([(x1, y1), (x2, y2)], fill=(107, 214, 203, 42), width=2)
+    label_font = font(22, True)
+    for x, y, label in nodes:
+        r = 28 if label in ["ETF", "模型"] else 22
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=(46, 174, 150, 150), outline=(220, 255, 247, 130), width=2)
+        draw.text((x - 22, y + r + 8), label, fill=(225, 246, 245, 150), font=label_font)
+
+    points = []
+    for i in range(38):
+        points.append((760 + i * 30, 500 - 75 * math.sin(i / 4.2) + rng.normal(0, 15)))
+    draw.line(points, fill=(255, 194, 88, 125), width=4)
+    draw.rectangle((0, 0, w, h), fill=(0, 0, 0, 20))
+    im.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
+    return dest
+
+
 def draw_logistics_background(dest_rel: str) -> Path:
     dest = slug_path(dest_rel)
     w, h = 1800, 980
@@ -412,6 +471,29 @@ def media_tag(src: str, alt: str = "", cls: str = "", caption: str | None = None
     if caption:
         return f'<figure>{body}<figcaption>{esc(caption)}</figcaption></figure>'
     return body
+
+
+def read_csv_dicts(src: Path) -> list[dict[str, str]]:
+    with src.open("r", encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def safe_float(value: str | float | int, digits: int = 3) -> str:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return f"{number:.{digits}f}".rstrip("0").rstrip(".")
+
+
+def reason_list(value: str, limit: int = 2) -> list[str]:
+    try:
+        parsed = ast.literal_eval(value)
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed[:limit]]
+    except (SyntaxError, ValueError):
+        pass
+    return [value] if value else []
 
 
 def tags_html(tags: list[str]) -> str:
@@ -629,7 +711,11 @@ def write_assets() -> dict[str, str]:
     )
     paths["quant_eval"] = rel(eval_chart)
     paths["quant_top3"] = rel(top_chart)
-    paths["quant_bg"] = rel(draw_quant_background("assets/images/quant/candlestick-hero.jpg"))
+    paths["quant_bg"] = rel(draw_quant_agent_background("assets/images/quant/agent-candlestick-hero.jpg"))
+
+    agent_pack = SOURCE_ROOT / "事件新闻情绪感知agent" / "portfolio_pack"
+    paths["agent_arch"] = rel(copy_static(agent_pack / "assets" / "architecture_flow.svg", "assets/images/quant/event-agent-architecture.svg"))
+    paths["agent_card"] = rel(copy_static(agent_pack / "assets" / "resume_zip_pack" / "项目概览卡片.svg", "assets/images/quant/event-agent-card.svg"))
 
     rail = SOURCE_ROOT / "铁路部件拼接项目"
     rail_common = rail / "portfolio_pack" / "common_assets"
@@ -798,6 +884,8 @@ h1 {
   line-height: 1.05;
   letter-spacing: 0;
   font-weight: 950;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .lead {
   max-width: 900px;
@@ -1036,6 +1124,210 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
+.fusion-map {
+  display: grid;
+  grid-template-columns: minmax(260px, .95fr) minmax(0, 1.35fr) minmax(260px, .95fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.fusion-panel {
+  position: relative;
+  min-height: 270px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(8, 23, 30, .96), rgba(17, 54, 60, .92));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.fusion-panel h3,
+.event-card h3,
+.etf-card h3,
+.risk-card h3 {
+  margin: 0 0 10px;
+  letter-spacing: 0;
+}
+.fusion-panel p {
+  margin: 0;
+  color: rgba(236, 249, 248, .78);
+}
+.fusion-panel ul {
+  margin: 16px 0 0;
+  padding-left: 19px;
+  color: rgba(236, 249, 248, .82);
+}
+.fusion-center {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background:
+    radial-gradient(circle at center, rgba(56, 189, 170, .28), transparent 48%),
+    linear-gradient(145deg, rgba(7, 20, 27, .98), rgba(14, 42, 50, .96));
+}
+.fusion-center strong {
+  display: block;
+  font-size: clamp(32px, 5vw, 64px);
+  line-height: 1;
+}
+.fusion-center span {
+  color: rgba(236, 249, 248, .78);
+  font-weight: 800;
+}
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+}
+.channel-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 128px;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+}
+.channel-card strong {
+  display: block;
+  color: #115571;
+  font-size: 26px;
+  line-height: 1;
+}
+.channel-card span {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.sector-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.sector-card {
+  position: relative;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+  overflow: hidden;
+}
+.sector-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: linear-gradient(180deg, #1c827d, #bd8d28);
+}
+.sector-card h3 {
+  margin: 0;
+  font-size: 19px;
+}
+.sector-score {
+  display: block;
+  margin-top: 12px;
+  color: #0e5574;
+  font-size: 34px;
+  font-weight: 950;
+  line-height: 1;
+}
+.sector-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+.etf-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.etf-card,
+.risk-card,
+.event-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+}
+.etf-card .code,
+.risk-card .code {
+  display: inline-flex;
+  margin-bottom: 10px;
+  padding: 5px 8px;
+  color: #0e5574;
+  background: #eef8fc;
+  border: 1px solid #cbe2ec;
+  border-radius: 7px;
+  font-weight: 950;
+}
+.score-line {
+  display: grid;
+  grid-template-columns: 90px 1fr 58px;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.score-track {
+  height: 9px;
+  border-radius: 999px;
+  background: #e7eef2;
+  overflow: hidden;
+}
+.score-track i {
+  display: block;
+  height: 100%;
+  width: var(--score-width, 50%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1c827d, #49a98d);
+}
+.risk-card .score-track i {
+  background: linear-gradient(90deg, #b95c49, #d59a43);
+}
+.reason-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+.event-timeline {
+  display: grid;
+  gap: 13px;
+}
+.event-card {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) 100px;
+  gap: 16px;
+  align-items: center;
+}
+.event-card .event-meta {
+  color: #0e5574;
+  font-size: 14px;
+  font-weight: 950;
+}
+.event-card p {
+  margin: 0;
+  color: #40515c;
+}
+.event-card .impact {
+  justify-self: end;
+  font-weight: 950;
+  color: #1c827d;
+}
+.event-card.negative .impact { color: #b95c49; }
+.notice-strip {
+  border: 1px solid #e3d7b7;
+  border-left: 5px solid var(--gold);
+  border-radius: 8px;
+  padding: 18px 20px;
+  background: #fffaf0;
+  color: #5f5030;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .04);
+}
 .feature-split {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr);
@@ -1107,12 +1399,24 @@ h1 {
   .showcase-media { min-height: 260px; }
   .phone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .phone-card img { height: 420px; }
+  .fusion-map,
+  .channel-grid,
+  .sector-board,
+  .etf-grid,
+  .event-card {
+    grid-template-columns: 1fr;
+  }
+  .event-card .impact { justify-self: start; }
 }
 @media (max-width: 620px) {
   .immersive-hero { min-height: calc(76vh - 58px); }
   .hero-inner { width: min(100% - 28px, 1180px); padding-bottom: 52px; }
-  h1 { font-size: clamp(36px, 13vw, 62px); }
-  .lead { font-size: 17px; }
+  h1 {
+    font-size: clamp(30px, 8.8vw, 44px);
+    line-height: 1.1;
+    word-break: break-all;
+  }
+  .lead { font-size: 16px; }
   .section { width: min(100% - 28px, 1180px); padding-top: 52px; }
   .showcase-item { padding: 12px; gap: 14px; }
   .phone-grid { grid-template-columns: 1fr; }
@@ -1340,33 +1644,165 @@ def write_fitness(paths: dict[str, str]) -> None:
 
 
 def write_quant(paths: dict[str, str]) -> None:
+    agent_pack = SOURCE_ROOT / "事件新闻情绪感知agent" / "portfolio_pack"
+    summary = json.loads((agent_pack / "data" / "portfolio_summary.json").read_text(encoding="utf-8"))
+    top_etfs = read_csv_dicts(agent_pack / "data" / "top_etf_overlays_v2.csv")
+    risk_etfs = read_csv_dicts(agent_pack / "data" / "risk_etf_overlays_v2.csv")
+    sectors = read_csv_dicts(agent_pack / "data" / "top_sectors_v2.csv")
+    events = read_csv_dicts(agent_pack / "data" / "representative_events_v2.csv")
+
+    channel_names = {
+        "media": "媒体叙事",
+        "disclosure": "专业披露",
+        "industry": "产业催化",
+        "policy": "政策监管",
+        "macro": "宏观经济",
+        "community": "社区情绪",
+        "geopolitical": "地缘风险",
+    }
+    channel_html = ""
+    for key in ["media", "disclosure", "industry", "policy", "macro", "community", "geopolitical"]:
+        channel_html += f"""
+        <article class="channel-card">
+          <strong>{esc(str(summary['impact_channel_counts'].get(key, 0)))}</strong>
+          <span>{esc(channel_names[key])}</span>
+        </article>
+        """
+
+    sector_html = ""
+    for item in sectors[:4]:
+        sector_html += f"""
+        <article class="sector-card">
+          <h3>{esc(item['板块桶'])}</h3>
+          <span class="sector-score">{esc(safe_float(item['日度分'], 3))}</span>
+          <p>{esc(item['状态'])} · 活跃事件 {esc(item['活跃事件数'])} 个</p>
+          <p>媒体 {esc(safe_float(item['媒体叙事'], 3))} / 产业 {esc(safe_float(item['产业催化'], 3))} / 政策 {esc(safe_float(item['政策支持'], 3))}</p>
+        </article>
+        """
+
+    def etf_card(item: dict[str, str]) -> str:
+        total = float(item["总信息分"])
+        risk = float(item["负向风险分"])
+        total_w = max(4, min(100, abs(total) / 3.5 * 100))
+        risk_w = max(4, min(100, risk / 0.37 * 100))
+        reasons = "".join(f"<li>{esc(reason)}</li>" for reason in reason_list(item.get("今日变化原因", "")))
+        return f"""
+        <article class="etf-card">
+          <span class="code">{esc(item['代码'])}</span>
+          <h3>{esc(item['名称'])}</h3>
+          <div class="score-line"><span>信息分</span><div class="score-track"><i style="--score-width:{total_w:.1f}%"></i></div><strong>{esc(safe_float(total, 3))}</strong></div>
+          <div class="score-line"><span>风险分</span><div class="score-track"><i style="--score-width:{risk_w:.1f}%"></i></div><strong>{esc(safe_float(risk, 3))}</strong></div>
+          <p>{esc(item['板块桶'])} · {esc(item['标签'])} · {esc(item['覆盖状态'])}</p>
+          <ul class="reason-list">{reasons}</ul>
+        </article>
+        """
+
+    etf_html = "".join(etf_card(item) for item in top_etfs[:4])
+
+    def risk_card(item: dict[str, str]) -> str:
+        risk = float(item["负向风险分"])
+        risk_w = max(4, min(100, risk / 0.37 * 100))
+        return f"""
+        <article class="risk-card">
+          <span class="code">{esc(item['代码'])}</span>
+          <h3>{esc(item['名称'])}</h3>
+          <div class="score-line"><span>负向风险</span><div class="score-track"><i style="--score-width:{risk_w:.1f}%"></i></div><strong>{esc(safe_float(risk, 3))}</strong></div>
+          <p>{esc(item['板块桶'])} · {esc(item['标签'])} · 信息分 {esc(safe_float(item['总信息分'], 3))}</p>
+        </article>
+        """
+
+    risk_html = "".join(risk_card(item) for item in risk_etfs[:4])
+
+    event_html = ""
+    for item in events[:6]:
+        impact = float(item["影响分"])
+        cls = " negative" if impact < 0 else ""
+        event_html += f"""
+        <article class="event-card{cls}">
+          <div class="event-meta">{esc(item['事件大类'])}<br>{esc(item['通道'])}</div>
+          <p>{esc(item['摘要'])}</p>
+          <div class="impact">{esc(safe_float(impact, 3))}<br><span>{esc(safe_float(item['置信度'], 2))}</span></div>
+        </article>
+        """
+
     body = immersive_hero(
         "事件与情绪分析智能体 / ETF量化辅助系统",
-        "ETF 横截面轮动 · 信息增强 · 模拟决策",
-        "以 ETF 横截面轮动预测为主引擎，结合事件新闻情绪感知 Agent 生成事件对象、板块情绪和 ETF 信息增强画像，用于候选排序解释、风险过滤和模拟调仓。",
+        "横截面轮动模型 · 事件新闻情绪 Agent · 模拟决策",
+        "以 ETF 横截面轮动预测为主引擎，事件新闻情绪感知 Agent 作为信息增强层，把公开文本转成事件对象、板块情绪和 ETF 画像，用于解释候选、确认催化、降权噪声和复核风险。",
         f"../{paths['quant_bg']}",
-        ["ETF轮动", "Logistic / XGBoost / LightGBM", "事件情绪 Agent", "模拟决策"],
+        ["ETF轮动", "事件新闻情绪Agent", "V2事件本体", "信息增强画像", "模拟调仓"],
     )
     body += section("系统数据", metric_cards([
         ("ETF 因子记录", "62,835 行"),
-        ("交易日", "1,781 个"),
-        ("固定特征", "46 个"),
-        ("事件对象", "2,145 条"),
+        ("量化交易日", "1,781 个"),
+        ("真实公开信息", f"{summary['counts']['raw_records']:,} 条"),
+        ("V2事件对象", f"{summary['counts']['events_v2']:,} 个"),
+        ("板块状态", f"{summary['counts']['sector_states_v2']} 个"),
+        ("ETF信息画像", f"{summary['counts']['etf_overlays_v2']} 个"),
     ]))
+    body += section("双引擎融合逻辑", """
+      <div class="fusion-map">
+        <article class="fusion-panel">
+          <h3>量化主引擎</h3>
+          <p>用 ETF 日线面板、46 个固定因子和多模型输出形成候选排序。</p>
+          <ul>
+            <li>预测未来 10 个交易日相对候选池中位数的强弱。</li>
+            <li>输出候选 ETF、概率、策略目标和滚动调仓模拟。</li>
+            <li>负责“先把可交易候选排出来”。</li>
+          </ul>
+        </article>
+        <article class="fusion-panel fusion-center">
+          <div><strong>排序 + 解释</strong><span>确认催化 · 风险复核 · 决策观察</span></div>
+        </article>
+        <article class="fusion-panel">
+          <h3>事件情绪 Agent</h3>
+          <p>把新闻、政策、披露和社区评论转成可追溯的信息增强信号。</p>
+          <ul>
+            <li>生成事件对象、板块情绪和 ETF 信息增强画像。</li>
+            <li>用于解释模型候选背后的信息变化。</li>
+            <li>负责“说明为什么该看、哪里要谨慎”。</li>
+          </ul>
+        </article>
+      </div>
+    """, subtitle="两个模块的分工不是并列展示，而是前后承接：量化模型负责排序，事件 Agent 负责解释、确认和风险复核。")
     body += section("工作台展示", f"""
       <div class="feature-split">
         <div class="wide-media">{media_tag(f"../{paths['quant_latest']}", "最新预测界面")}</div>
         <div class="rich-copy">
-          <h3>从预测排序到策略观察</h3>
-          <p>系统预测未来 10 个交易日是否跑赢候选池中位数，并将模型输出组织为候选 ETF、概率、策略目标和观察信息。</p>
+          <h3>从预测候选到可解释观察</h3>
+          <p>量化工作台输出候选 ETF 和模拟策略，事件 Agent 将当日公开信息映射到 ETF 主题上，形成“候选排序 + 信息画像 + 风险复核”的组合视图。</p>
           <ul>
-            <li>多模型输出用于比较不同表格建模方法的排序稳定性。</li>
-            <li>事件与情绪层用于解释 ETF 信号背后的板块、新闻和社区情绪变化。</li>
-            <li>模拟调仓用于观察策略在连续交易日上的资金曲线变化。</li>
+            <li>模型输出解决“谁排在前面”。</li>
+            <li>事件画像解释“当日信息为什么支持或削弱”。</li>
+            <li>风险分用于识别需要人工复核的主题，避免只看正向概率。</li>
           </ul>
         </div>
       </div>
     """)
+    body += section("事件 Agent 架构", f"""
+      <div class="feature-split">
+        <div class="wide-media">{media_tag(f"../{paths['agent_arch']}", "事件新闻情绪 Agent 架构")}</div>
+        <div class="rich-copy">
+          <h3>规则主链路 + LLM 结构化增强</h3>
+          <p>Agent 采用固定 Workflow：真实公开来源进入数据获取、清洗过滤、去重聚类、统一证据对象、可选 LLM 结构化、事件融合、板块情绪和 ETF 信息增强画像。</p>
+          <ul>
+            <li>数据源包括财经新闻、专业披露与会议纪要、基金社区评论等公开信息。</li>
+            <li>V2 事件本体统一映射政策、宏观、产业、披露、地缘、媒体和社区情绪。</li>
+            <li>LLM 失败时不阻断主流程，分析层按规则结果兜底完成。</li>
+          </ul>
+        </div>
+      </div>
+    """)
+    body += section("事件批次实证", metric_cards([
+        ("运行批次", str(summary["batch_id"])),
+        ("运行日期", str(summary["run_date"])),
+        ("财经新闻", f"{summary['source_module_counts']['财经新闻']:,} 条"),
+        ("专业披露", f"{summary['source_module_counts']['专业披露与会议纪要']:,} 条"),
+        ("社区评论", f"{summary['source_module_counts']['基金社区评论']:,} 条"),
+        ("非零影响事件", f"{summary['counts']['nonzero_events_v2']:,} 个"),
+        ("正向/负向事件", f"{summary['counts']['positive_events_v2']} / {summary['counts']['negative_events_v2']}"),
+        ("平均置信度", safe_float(summary["counts"]["avg_event_confidence"], 4)),
+    ]))
     body += section("预测与模拟结果", f"""
       <div class="gallery">
         {picture_panel(f"../{paths['quant_sim']}", "真实模拟", "从一个观察日开始，按所选策略每10个交易日滚动调仓，模拟资金变化。")}
@@ -1375,12 +1811,28 @@ def write_quant(paths: dict[str, str]) -> None:
         {picture_panel(f"../{paths['quant_old_auc']}", "测试集 AUC 源图")}
       </div>
     """)
-    body += section("事件与情绪增强层", """
+    body += section("影响通道分布", f"""
+      <div class="channel-grid">{channel_html}</div>
+    """, subtitle="事件对象按影响通道进入后续聚合，媒体叙事提供高频线索，披露、政策和产业事件用于增强置信与解释。")
+    body += section("板块情绪状态", f"""
+      <div class="sector-board">{sector_html}</div>
+    """, subtitle="板块状态把事件对象从新闻粒度聚合到可与 ETF 主题承接的层级。")
+    body += section("ETF 信息增强画像", f"""
+      <div class="etf-grid">{etf_html}</div>
+    """, subtitle="这些画像不是收益预测，而是把当日事件与情绪映射到 ETF 候选，用于解释量化候选背后的信息结构。")
+    body += section("风险复核清单", f"""
+      <div class="etf-grid">{risk_html}</div>
+    """, subtitle="风险分用于提示候选之外的负向事件压力，尤其适合在模拟决策前做人工复核。")
+    body += section("代表事件链路", f"""
+      <div class="event-timeline">{event_html}</div>
+    """, subtitle="事件保留事件类型、影响通道、影响分和置信度，可从 ETF 画像继续回溯到证据包和原始来源。")
+    body += section("融合后的决策位置", """
       <div class="text-grid">
-        <article class="text-panel"><h3>信息采集</h3><p>接入财经新闻、公告披露、会议纪要和基金社区评论，形成每日原始信息池。</p></article>
-        <article class="text-panel"><h3>事件结构化</h3><p>通过质量评分、跨源聚类、事件本体映射和 LLM 结构化提取生成事件对象。</p></article>
-        <article class="text-panel"><h3>量化承接</h3><p>事件层不替代量化排序，而是用于解释模型结果、提示风险和辅助复盘。</p></article>
+        <article class="text-panel"><h3>排序层</h3><p>量化模型根据历史因子和相对强弱标签生成候选 ETF 排序。</p></article>
+        <article class="text-panel"><h3>解释层</h3><p>事件 Agent 给出板块催化、信息分、风险分和当日变化原因。</p></article>
+        <article class="text-panel"><h3>复盘层</h3><p>模拟调仓后可以回看当日模型信号与事件证据是否一致，形成可复盘闭环。</p></article>
       </div>
+      <div class="notice-strip" style="margin-top:16px">展示批次 20260507_002 的状态为 partial_success_llm_timeout：数据采集、处理层和分析层已完成，LLM 结构化阶段超时后按规则链路兜底。页面将其表述为“规则主链路 + 可选 LLM 增强”，不宣称完整 LLM 闭环或投资建议。</div>
     """)
     (PROJECTS_DIR / "quant-agent.html").write_text(page_shell("事件与情绪分析智能体 / ETF量化辅助系统", "ETF 轮动、事件情绪和模拟决策系统", body, active="quant"), encoding="utf-8")
 

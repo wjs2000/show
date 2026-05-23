@@ -13,14 +13,14 @@
     <nav><a href="../index.html">首页</a><a href="avm-360.html">360环视</a><a href="acaf-finance.html">AFAC金融</a><a href="ai-fitness.html">AI健身</a><a href="quant-agent.html">量化Agent</a><a href="railway-stitching.html">铁路拼接</a><a href="logistics-llm.html">物流大模型</a><a href="miniapps.html">小程序合集</a></nav>
   </header>
   <main>
-    <section class="immersive-hero" style="--hero-image: url('../assets/images/quant/candlestick-hero.jpg')">
+    <section class="immersive-hero" style="--hero-image: url('../assets/images/quant/agent-candlestick-hero.jpg')">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="hero-inner">
-        <p class="kicker">ETF 横截面轮动 · 信息增强 · 模拟决策</p>
+        <p class="kicker">横截面轮动模型 · 事件新闻情绪 Agent · 模拟决策</p>
         <h1>事件与情绪分析智能体 / ETF量化辅助系统</h1>
-        <p class="lead">以 ETF 横截面轮动预测为主引擎，结合事件新闻情绪感知 Agent 生成事件对象、板块情绪和 ETF 信息增强画像，用于候选排序解释、风险过滤和模拟调仓。</p>
-        <div class="tag-row"><span>ETF轮动</span><span>Logistic / XGBoost / LightGBM</span><span>事件情绪 Agent</span><span>模拟决策</span></div>
+        <p class="lead">以 ETF 横截面轮动预测为主引擎，事件新闻情绪感知 Agent 作为信息增强层，把公开文本转成事件对象、板块情绪和 ETF 画像，用于解释候选、确认催化、降权噪声和复核风险。</p>
+        <div class="tag-row"><span>ETF轮动</span><span>事件新闻情绪Agent</span><span>V2事件本体</span><span>信息增强画像</span><span>模拟调仓</span></div>
       </div>
     </section>
     
@@ -29,7 +29,39 @@
         <h2>系统数据</h2>
         
       </div>
-      <div class="metrics"><div class="metric"><strong>62,835 行</strong><span>ETF 因子记录</span></div><div class="metric"><strong>1,781 个</strong><span>交易日</span></div><div class="metric"><strong>46 个</strong><span>固定特征</span></div><div class="metric"><strong>2,145 条</strong><span>事件对象</span></div></div>
+      <div class="metrics"><div class="metric"><strong>62,835 行</strong><span>ETF 因子记录</span></div><div class="metric"><strong>1,781 个</strong><span>量化交易日</span></div><div class="metric"><strong>7,419 条</strong><span>真实公开信息</span></div><div class="metric"><strong>2,145 个</strong><span>V2事件对象</span></div><div class="metric"><strong>14 个</strong><span>板块状态</span></div><div class="metric"><strong>20 个</strong><span>ETF信息画像</span></div></div>
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>双引擎融合逻辑</h2>
+        <p>两个模块的分工不是并列展示，而是前后承接：量化模型负责排序，事件 Agent 负责解释、确认和风险复核。</p>
+      </div>
+      
+      <div class="fusion-map">
+        <article class="fusion-panel">
+          <h3>量化主引擎</h3>
+          <p>用 ETF 日线面板、46 个固定因子和多模型输出形成候选排序。</p>
+          <ul>
+            <li>预测未来 10 个交易日相对候选池中位数的强弱。</li>
+            <li>输出候选 ETF、概率、策略目标和滚动调仓模拟。</li>
+            <li>负责“先把可交易候选排出来”。</li>
+          </ul>
+        </article>
+        <article class="fusion-panel fusion-center">
+          <div><strong>排序 + 解释</strong><span>确认催化 · 风险复核 · 决策观察</span></div>
+        </article>
+        <article class="fusion-panel">
+          <h3>事件情绪 Agent</h3>
+          <p>把新闻、政策、披露和社区评论转成可追溯的信息增强信号。</p>
+          <ul>
+            <li>生成事件对象、板块情绪和 ETF 信息增强画像。</li>
+            <li>用于解释模型候选背后的信息变化。</li>
+            <li>负责“说明为什么该看、哪里要谨慎”。</li>
+          </ul>
+        </article>
+      </div>
+    
     </section>
     
     <section class="section ">
@@ -41,16 +73,45 @@
       <div class="feature-split">
         <div class="wide-media"><img src="../assets/images/quant/latest-prediction.jpg" alt="最新预测界面" loading="lazy"></div>
         <div class="rich-copy">
-          <h3>从预测排序到策略观察</h3>
-          <p>系统预测未来 10 个交易日是否跑赢候选池中位数，并将模型输出组织为候选 ETF、概率、策略目标和观察信息。</p>
+          <h3>从预测候选到可解释观察</h3>
+          <p>量化工作台输出候选 ETF 和模拟策略，事件 Agent 将当日公开信息映射到 ETF 主题上，形成“候选排序 + 信息画像 + 风险复核”的组合视图。</p>
           <ul>
-            <li>多模型输出用于比较不同表格建模方法的排序稳定性。</li>
-            <li>事件与情绪层用于解释 ETF 信号背后的板块、新闻和社区情绪变化。</li>
-            <li>模拟调仓用于观察策略在连续交易日上的资金曲线变化。</li>
+            <li>模型输出解决“谁排在前面”。</li>
+            <li>事件画像解释“当日信息为什么支持或削弱”。</li>
+            <li>风险分用于识别需要人工复核的主题，避免只看正向概率。</li>
           </ul>
         </div>
       </div>
     
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>事件 Agent 架构</h2>
+        
+      </div>
+      
+      <div class="feature-split">
+        <div class="wide-media"><img src="../assets/images/quant/event-agent-architecture.svg" alt="事件新闻情绪 Agent 架构" loading="lazy"></div>
+        <div class="rich-copy">
+          <h3>规则主链路 + LLM 结构化增强</h3>
+          <p>Agent 采用固定 Workflow：真实公开来源进入数据获取、清洗过滤、去重聚类、统一证据对象、可选 LLM 结构化、事件融合、板块情绪和 ETF 信息增强画像。</p>
+          <ul>
+            <li>数据源包括财经新闻、专业披露与会议纪要、基金社区评论等公开信息。</li>
+            <li>V2 事件本体统一映射政策、宏观、产业、披露、地缘、媒体和社区情绪。</li>
+            <li>LLM 失败时不阻断主流程，分析层按规则结果兜底完成。</li>
+          </ul>
+        </div>
+      </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>事件批次实证</h2>
+        
+      </div>
+      <div class="metrics"><div class="metric"><strong>20260507_002</strong><span>运行批次</span></div><div class="metric"><strong>2026-05-07</strong><span>运行日期</span></div><div class="metric"><strong>3,000 条</strong><span>财经新闻</span></div><div class="metric"><strong>257 条</strong><span>专业披露</span></div><div class="metric"><strong>4,162 条</strong><span>社区评论</span></div><div class="metric"><strong>238 个</strong><span>非零影响事件</span></div><div class="metric"><strong>192 / 46</strong><span>正向/负向事件</span></div><div class="metric"><strong>0.7796</strong><span>平均置信度</span></div></div>
     </section>
     
     <section class="section ">
@@ -102,15 +163,229 @@
     
     <section class="section ">
       <div class="section-heading">
-        <h2>事件与情绪增强层</h2>
+        <h2>影响通道分布</h2>
+        <p>事件对象按影响通道进入后续聚合，媒体叙事提供高频线索，披露、政策和产业事件用于增强置信与解释。</p>
+      </div>
+      
+      <div class="channel-grid">
+        <article class="channel-card">
+          <strong>1563</strong>
+          <span>媒体叙事</span>
+        </article>
+        
+        <article class="channel-card">
+          <strong>282</strong>
+          <span>专业披露</span>
+        </article>
+        
+        <article class="channel-card">
+          <strong>141</strong>
+          <span>产业催化</span>
+        </article>
+        
+        <article class="channel-card">
+          <strong>59</strong>
+          <span>政策监管</span>
+        </article>
+        
+        <article class="channel-card">
+          <strong>54</strong>
+          <span>宏观经济</span>
+        </article>
+        
+        <article class="channel-card">
+          <strong>37</strong>
+          <span>社区情绪</span>
+        </article>
+        
+        <article class="channel-card">
+          <strong>9</strong>
+          <span>地缘风险</span>
+        </article>
+        </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>板块情绪状态</h2>
+        <p>板块状态把事件对象从新闻粒度聚合到可与 ETF 主题承接的层级。</p>
+      </div>
+      
+      <div class="sector-board">
+        <article class="sector-card">
+          <h3>tmt_growth</h3>
+          <span class="sector-score">3.853</span>
+          <p>positive_catalyst · 活跃事件 231 个</p>
+          <p>媒体 2.649 / 产业 1.201 / 政策 0</p>
+        </article>
+        
+        <article class="sector-card">
+          <h3>broad_market</h3>
+          <span class="sector-score">2.15</span>
+          <p>positive_catalyst · 活跃事件 783 个</p>
+          <p>媒体 2.033 / 产业 0.042 / 政策 0.076</p>
+        </article>
+        
+        <article class="sector-card">
+          <h3>financials</h3>
+          <span class="sector-score">0.659</span>
+          <p>positive_catalyst · 活跃事件 199 个</p>
+          <p>媒体 0.573 / 产业 0 / 政策 0.07</p>
+        </article>
+        
+        <article class="sector-card">
+          <h3>growth_board</h3>
+          <span class="sector-score">0.388</span>
+          <p>positive_catalyst · 活跃事件 48 个</p>
+          <p>媒体 0.389 / 产业 0 / 政策 0</p>
+        </article>
+        </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>ETF 信息增强画像</h2>
+        <p>这些画像不是收益预测，而是把当日事件与情绪映射到 ETF 候选，用于解释量化候选背后的信息结构。</p>
+      </div>
+      
+      <div class="etf-grid">
+        <article class="etf-card">
+          <span class="code">512480</span>
+          <h3>半导体ETF</h3>
+          <div class="score-line"><span>信息分</span><div class="score-track"><i style="--score-width:99.2%"></i></div><strong>3.472</strong></div>
+          <div class="score-line"><span>风险分</span><div class="score-track"><i style="--score-width:28.5%"></i></div><strong>0.106</strong></div>
+          <p>tmt_growth · confirmed_catalyst · covered</p>
+          <ul class="reason-list"><li>港股科网板块走强，快手涨超7%！可灵AI年化收入突破3亿美元</li><li>半导体设备ETF国泰（159516）大涨超2.3%，交投活跃</li></ul>
+        </article>
+        
+        <article class="etf-card">
+          <span class="code">510300</span>
+          <h3>沪深300ETF</h3>
+          <div class="score-line"><span>信息分</span><div class="score-track"><i style="--score-width:55.0%"></i></div><strong>1.926</strong></div>
+          <div class="score-line"><span>风险分</span><div class="score-track"><i style="--score-width:34.5%"></i></div><strong>0.128</strong></div>
+          <p>broad_market · confirmed_catalyst · empty_today</p>
+          <ul class="reason-list"><li>算电协同再迎利好，绿电ETF华夏（562550）放量上涨，大唐发电2连板</li><li>月之暗面投后估值突破200亿美元！港股通恒生科技ETF（520840）强势上涨3.06%</li></ul>
+        </article>
+        
+        <article class="etf-card">
+          <span class="code">515880</span>
+          <h3>通信ETF</h3>
+          <div class="score-line"><span>信息分</span><div class="score-track"><i style="--score-width:49.4%"></i></div><strong>1.729</strong></div>
+          <div class="score-line"><span>风险分</span><div class="score-track"><i style="--score-width:12.0%"></i></div><strong>0.044</strong></div>
+          <p>tmt_growth · confirmed_catalyst · covered</p>
+          <ul class="reason-list"><li>英伟达与康宁达成5亿美元股权融资协议，光纤、CPO等概念持续活跃，通信ETF广发(159507)午后拉升涨超4%</li><li>光纤概念领涨市场，通信ETF华夏（515050）震荡走强涨超1%，近20日吸金超10亿元</li></ul>
+        </article>
+        
+        <article class="etf-card">
+          <span class="code">512720</span>
+          <h3>计算机ETF</h3>
+          <div class="score-line"><span>信息分</span><div class="score-track"><i style="--score-width:38.7%"></i></div><strong>1.353</strong></div>
+          <div class="score-line"><span>风险分</span><div class="score-track"><i style="--score-width:11.4%"></i></div><strong>0.042</strong></div>
+          <p>tmt_growth · confirmed_catalyst · covered</p>
+          <ul class="reason-list"><li>港股科网板块走强，快手涨超7%！可灵AI年化收入突破3亿美元</li><li>半导体设备ETF国泰（159516）大涨超2.3%，交投活跃</li></ul>
+        </article>
+        </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>风险复核清单</h2>
+        <p>风险分用于提示候选之外的负向事件压力，尤其适合在模拟决策前做人工复核。</p>
+      </div>
+      
+      <div class="etf-grid">
+        <article class="risk-card">
+          <span class="code">512170</span>
+          <h3>医疗ETF</h3>
+          <div class="score-line"><span>负向风险</span><div class="score-track"><i style="--score-width:98.4%"></i></div><strong>0.364</strong></div>
+          <p>healthcare · risk_review · 信息分 -0.346</p>
+        </article>
+        
+        <article class="risk-card">
+          <span class="code">512010</span>
+          <h3>医药ETF</h3>
+          <div class="score-line"><span>负向风险</span><div class="score-track"><i style="--score-width:70.3%"></i></div><strong>0.26</strong></div>
+          <p>healthcare · neutral · 信息分 -0.217</p>
+        </article>
+        
+        <article class="risk-card">
+          <span class="code">510300</span>
+          <h3>沪深300ETF</h3>
+          <div class="score-line"><span>负向风险</span><div class="score-track"><i style="--score-width:34.5%"></i></div><strong>0.128</strong></div>
+          <p>broad_market · confirmed_catalyst · 信息分 1.926</p>
+        </article>
+        
+        <article class="risk-card">
+          <span class="code">512800</span>
+          <h3>银行ETF</h3>
+          <div class="score-line"><span>负向风险</span><div class="score-track"><i style="--score-width:31.5%"></i></div><strong>0.117</strong></div>
+          <p>financials · confirmed_catalyst · 信息分 0.369</p>
+        </article>
+        </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>代表事件链路</h2>
+        <p>事件保留事件类型、影响通道、影响分和置信度，可从 ETF 画像继续回溯到证据包和原始来源。</p>
+      </div>
+      
+      <div class="event-timeline">
+        <article class="event-card">
+          <div class="event-meta">市场叙事<br>media</div>
+          <p>港股科网板块走强，快手涨超7%！可灵AI年化收入突破3亿美元</p>
+          <div class="impact">0.227<br><span>0.84</span></div>
+        </article>
+        
+        <article class="event-card">
+          <div class="event-meta">市场叙事<br>media</div>
+          <p>半导体设备ETF国泰（159516）大涨超2.3%，交投活跃</p>
+          <div class="impact">0.181<br><span>0.95</span></div>
+        </article>
+        
+        <article class="event-card">
+          <div class="event-meta">产业催化<br>industry</div>
+          <p>半导体产业链持续走强 华虹公司涨超10%创历史新高</p>
+          <div class="impact">0.181<br><span>0.83</span></div>
+        </article>
+        
+        <article class="event-card">
+          <div class="event-meta">市场叙事<br>media</div>
+          <p>午评：创指半日涨3.29% 科创50涨超</p>
+          <div class="impact">0.155<br><span>0.82</span></div>
+        </article>
+        
+        <article class="event-card negative">
+          <div class="event-meta">市场叙事<br>media</div>
+          <p>英科医疗股价连续3天下跌累计跌幅9.31%，国泰基金旗下24只基金合计持1349.88万股，浮亏损失7262.38万元</p>
+          <div class="impact">-0.155<br><span>0.82</span></div>
+        </article>
+        
+        <article class="event-card negative">
+          <div class="event-meta">市场叙事<br>media</div>
+          <p>英科医疗股价连续3天下跌累计跌幅9.31%，光大保德信基金旗下3只基金合计持63.04万股，浮亏损失339.16万元</p>
+          <div class="impact">-0.155<br><span>0.82</span></div>
+        </article>
+        </div>
+    
+    </section>
+    
+    <section class="section ">
+      <div class="section-heading">
+        <h2>融合后的决策位置</h2>
         
       </div>
       
       <div class="text-grid">
-        <article class="text-panel"><h3>信息采集</h3><p>接入财经新闻、公告披露、会议纪要和基金社区评论，形成每日原始信息池。</p></article>
-        <article class="text-panel"><h3>事件结构化</h3><p>通过质量评分、跨源聚类、事件本体映射和 LLM 结构化提取生成事件对象。</p></article>
-        <article class="text-panel"><h3>量化承接</h3><p>事件层不替代量化排序，而是用于解释模型结果、提示风险和辅助复盘。</p></article>
+        <article class="text-panel"><h3>排序层</h3><p>量化模型根据历史因子和相对强弱标签生成候选 ETF 排序。</p></article>
+        <article class="text-panel"><h3>解释层</h3><p>事件 Agent 给出板块催化、信息分、风险分和当日变化原因。</p></article>
+        <article class="text-panel"><h3>复盘层</h3><p>模拟调仓后可以回看当日模型信号与事件证据是否一致，形成可复盘闭环。</p></article>
       </div>
+      <div class="notice-strip" style="margin-top:16px">展示批次 20260507_002 的状态为 partial_success_llm_timeout：数据采集、处理层和分析层已完成，LLM 结构化阶段超时后按规则链路兜底。页面将其表述为“规则主链路 + 可选 LLM 增强”，不宣称完整 LLM 闭环或投资建议。</div>
     
     </section>
     </main>
