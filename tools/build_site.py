@@ -23,7 +23,7 @@ ASSETS = REPO / "assets"
 PROJECTS_DIR = REPO / "projects"
 
 SOURCE_ROOT = Path(r"G:\云南财经大学\工作实习\项目文档")
-ASSET_VERSION = "20260524_fundlook"
+ASSET_VERSION = "20260524_fundlook_nav"
 FUNDLOOK_ROOT = SOURCE_ROOT / "Yimi-fundlook-wesite" / "Yimi-fundlook-wesite" / "frontend"
 NPM_BIN = "npm.cmd" if os.name == "nt" else "npm"
 
@@ -55,6 +55,88 @@ def copytree_filtered(src: Path, dest: Path, *, ignore_dirs: set[str] | None = N
             copytree_filtered(item, target, ignore_dirs=ignore_dirs)
         else:
             shutil.copy2(item, target)
+
+
+def inject_fundlook_portfolio_nav(dist: Path) -> None:
+    index_file = dist / "index.html"
+    css_files = sorted((dist / "assets").glob("*.css"))
+    if not index_file.exists() or not css_files:
+        raise FileNotFoundError("FundLook build output is incomplete")
+
+    nav_html = """
+    <header class="portfolio-return-header">
+      <a class="portfolio-return-brand" href="../../index.html">项目作品集</a>
+      <nav aria-label="作品集导航">
+        <a href="../../index.html">首页</a>
+        <a href="../avm-360.html">360环视</a>
+        <a href="../acaf-finance.html">AFAC金融</a>
+        <a href="../ai-fitness.html">AI健身</a>
+        <a href="../quant-agent.html">量化Agent</a>
+        <a href="../railway-stitching.html">铁路拼接</a>
+        <a href="../logistics-llm.html">物流大模型</a>
+        <a href="./index.html">FundLook</a>
+        <a href="../miniapps.html">小程序合集</a>
+      </nav>
+    </header>
+"""
+    html_text = index_file.read_text(encoding="utf-8")
+    html_text = html_text.replace("<body>", f"<body>\n{nav_html}", 1)
+    index_file.write_text(html_text, encoding="utf-8")
+
+    css = """
+
+/* Portfolio shell navigation injected for GitHub Pages showcase. */
+.portfolio-return-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 5.5vw;
+  background: rgba(255, 255, 255, .92);
+  border-bottom: 1px solid rgba(218, 228, 234, .86);
+  backdrop-filter: blur(16px);
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+}
+.portfolio-return-brand {
+  color: #102231;
+  font-size: 18px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.portfolio-return-header nav {
+  display: flex;
+  gap: 17px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.portfolio-return-header nav a {
+  color: #315063;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.portfolio-return-header + #root .site-header {
+  top: 58px;
+}
+@media (max-width: 980px) {
+  .portfolio-return-header {
+    padding: 0 18px;
+  }
+  .portfolio-return-brand {
+    display: none;
+  }
+  .portfolio-return-header nav {
+    width: 100%;
+  }
+}
+"""
+    with css_files[0].open("a", encoding="utf-8") as f:
+        f.write(css)
 
 
 def esc(text: str) -> str:
@@ -2199,6 +2281,7 @@ def write_fundlook_site() -> None:
         if target.exists():
             shutil.rmtree(target)
         shutil.copytree(app_dir / "dist", target)
+        inject_fundlook_portfolio_nav(target)
     finally:
         shutil.rmtree(work_root, ignore_errors=True)
 
