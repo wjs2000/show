@@ -8,6 +8,8 @@ import json
 import math
 import os
 import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Iterable
 
@@ -21,7 +23,9 @@ ASSETS = REPO / "assets"
 PROJECTS_DIR = REPO / "projects"
 
 SOURCE_ROOT = Path(r"G:\云南财经大学\工作实习\项目文档")
-ASSET_VERSION = "20260523_quant_layout"
+ASSET_VERSION = "20260524_fundlook"
+FUNDLOOK_ROOT = SOURCE_ROOT / "Yimi-fundlook-wesite" / "Yimi-fundlook-wesite" / "frontend"
+NPM_BIN = "npm.cmd" if os.name == "nt" else "npm"
 
 
 def ensure_clean() -> None:
@@ -36,6 +40,21 @@ def ensure_clean() -> None:
         if path.exists():
             shutil.rmtree(path, onerror=clear_readonly)
         path.mkdir(parents=True, exist_ok=True)
+
+
+def copytree_filtered(src: Path, dest: Path, *, ignore_dirs: set[str] | None = None) -> None:
+    ignore_dirs = ignore_dirs or set()
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir(parents=True, exist_ok=True)
+    for item in src.iterdir():
+        if item.name in ignore_dirs:
+            continue
+        target = dest / item.name
+        if item.is_dir():
+            copytree_filtered(item, target, ignore_dirs=ignore_dirs)
+        else:
+            shutil.copy2(item, target)
 
 
 def esc(text: str) -> str:
@@ -595,6 +614,7 @@ def page_shell(title: str, subtitle: str, body: str, active: str = "") -> str:
         ("quant-agent.html", "量化Agent"),
         ("railway-stitching.html", "铁路拼接"),
         ("logistics-llm.html", "物流大模型"),
+        ("fundlook/index.html", "FundLook"),
         ("miniapps.html", "小程序合集"),
     ]
     if not active:
@@ -737,6 +757,9 @@ def write_assets() -> dict[str, str]:
     ]:
         paths[key] = rel(copy_image(logistics / name, f"assets/images/logistics/{key}.jpg", 1400, 900))
     paths["log_bg"] = rel(draw_logistics_background("assets/images/logistics/logistics-hero.jpg"))
+
+    fundlook_cover = REPO / "source_assets" / "fundlook-cover.png"
+    paths["fundlook_cover"] = rel(copy_image(fundlook_cover, "assets/images/fundlook/fundlook-cover.jpg", 1500, 980))
 
     campus = SOURCE_ROOT / "校园网约车项目" / "portfolio_pack" / "素材包"
     shuy = SOURCE_ROOT / "舒腰健脊App开发" / "portfolio_pack" / "素材包"
@@ -1570,7 +1593,8 @@ def write_index(paths: dict[str, str]) -> None:
         ("04", "事件与情绪分析智能体 / ETF量化辅助系统", "ETF 横截面轮动主引擎结合事件新闻情绪层，用于候选排序、解释和模拟调仓。", paths["quant_sim"], "projects/quant-agent.html", ["ETF轮动", "Agent", "模拟决策"]),
         ("05", "铁路无人机视频全景拼接", "从连续无人机视频帧生成铁路场景全景底图，支撑巡检场景的大视野观察。", paths["rail_final"], "projects/railway-stitching.html", ["SIFT", "RANSAC", "全景拼接"]),
         ("06", "物流大数据垂直大模型", "RAG 知识库、物流领域工具调用、路径优化、风险预警与自动周报工作台。", paths["log_dashboard"], "projects/logistics-llm.html", ["RAG", "Streamlit", "路径优化"]),
-        ("07", "微信小程序展示合集", "校园网约车、舒腰健脊、登山协会三个小程序，展示产品流程与前端实现能力。", paths["mini_collage"], "projects/miniapps.html", ["微信小程序", "Vue", "产品原型"]),
+        ("07", "FundLook / 基金看看", "面向基金用户的认知与分析网站，覆盖基金解释、持仓体检、组合试配、费用工具、限购雷达和每日推送。", paths["fundlook_cover"], "projects/fundlook/index.html", ["React", "基金分析", "产品网站"]),
+        ("08", "微信小程序展示合集", "校园网约车、舒腰健脊、登山协会三个小程序，展示产品流程与前端实现能力。", paths["mini_collage"], "projects/miniapps.html", ["微信小程序", "Vue", "产品原型"]),
     ]
     card_html = ""
     for num, title, desc, img, href, tags in cards:
@@ -2154,6 +2178,31 @@ def write_miniapps(paths: dict[str, str]) -> None:
     (PROJECTS_DIR / "miniapps.html").write_text(page_shell("微信小程序展示合集", "校园网约车、舒腰健脊与登山协会小程序", body, active="miniapps"), encoding="utf-8")
 
 
+def write_fundlook_site() -> None:
+    if not FUNDLOOK_ROOT.exists():
+        raise FileNotFoundError(FUNDLOOK_ROOT)
+
+    work_root = Path(tempfile.mkdtemp(prefix="fundlook-build-", dir=REPO))
+    app_dir = work_root / "frontend"
+    copytree_filtered(FUNDLOOK_ROOT, app_dir, ignore_dirs={"node_modules", "dist"})
+    main_file = app_dir / "src" / "main.tsx"
+    main_text = main_file.read_text(encoding="utf-8")
+    main_text = main_text.replace("import { BrowserRouter } from 'react-router-dom';", "import { HashRouter } from 'react-router-dom';")
+    main_text = main_text.replace("<BrowserRouter>", "<HashRouter>")
+    main_text = main_text.replace("</BrowserRouter>", "</HashRouter>")
+    main_file.write_text(main_text, encoding="utf-8")
+
+    try:
+        subprocess.run([NPM_BIN, "ci"], cwd=app_dir, check=True)
+        subprocess.run([NPM_BIN, "run", "build", "--", "--base", "./"], cwd=app_dir, check=True)
+        target = PROJECTS_DIR / "fundlook"
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.copytree(app_dir / "dist", target)
+    finally:
+        shutil.rmtree(work_root, ignore_errors=True)
+
+
 def write_readme() -> None:
     readme = """# 项目作品集
 
@@ -2173,6 +2222,7 @@ https://wjs2000.github.io/show/
 - 事件与情绪分析智能体 / ETF量化辅助系统
 - 铁路无人机视频全景拼接
 - 物流大数据垂直大模型
+- FundLook / 基金看看
 - 微信小程序展示合集
 """
     (REPO / "README.md").write_text(readme, encoding="utf-8")
@@ -2189,6 +2239,7 @@ def main() -> None:
     write_quant(paths)
     write_railway(paths)
     write_logistics(paths)
+    write_fundlook_site()
     write_miniapps(paths)
     write_readme()
     print("Built portfolio site")

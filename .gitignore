@@ -1,5 +1,7 @@
 _preview_*.png
 .server.*
+.fundlook-server.*
+.fundlook-build-*
 .edge-profile-*
 Thumbs.db
 .DS_Store
