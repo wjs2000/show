@@ -10,6 +10,7 @@ https://wjs2000.github.io/show/
 
 站点内容包括：
 
+- Ambarella 多目视觉与篮球 ePTZ 实习项目
 - 360车载全景影像拼接
 - AFAC2025金融智能创新大赛
 - AI健身动作识别与评分系统

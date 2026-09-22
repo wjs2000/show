@@ -759,3 +759,162 @@ h1 {
   .showcase-item { padding: 12px; gap: 14px; }
   .phone-grid { grid-template-columns: 1fr; }
 }
+
+/* Internship project — follows the portfolio's existing visual system. */
+.site-header nav a[aria-current="page"] {
+  color: #0e6684;
+  box-shadow: inset 0 -2px #1c827d;
+}
+.internship-hero .hero-bg { background-position: center 42%; }
+.internship-hero .hero-shade {
+  background:
+    linear-gradient(90deg, rgba(5, 14, 20, .93), rgba(5, 14, 20, .56) 57%, rgba(5, 14, 20, .14)),
+    linear-gradient(0deg, rgba(5, 14, 20, .76), rgba(5, 14, 20, .08) 62%);
+}
+.internship-hero h1 {
+  max-width: 960px;
+  font-size: clamp(42px, 6.5vw, 86px);
+}
+.internship-hero h1 span { white-space: nowrap; }
+.internship-intro { padding-top: 84px; }
+.track-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+.track-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(16, 31, 40, .05);
+}
+.track-no {
+  color: var(--gold);
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 950;
+}
+.track-card h3 {
+  margin: 3px 0 8px;
+  font-size: 23px;
+  line-height: 1.25;
+}
+.track-card p { margin: 0; color: var(--muted); }
+.eyebrow,
+.chapter-heading p {
+  margin: 0;
+  color: #287279;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.chapter-heading {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.chapter-heading > span {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid #c7d8dd;
+  color: var(--gold);
+  background: #fff;
+  font-size: 20px;
+  font-weight: 950;
+}
+.chapter-heading h2 {
+  margin: 4px 0 0;
+  font-size: clamp(28px, 3.2vw, 46px);
+  line-height: 1.16;
+}
+.internship-wide img { max-height: none; }
+.section-gap { margin-top: 20px; }
+.challenge-note {
+  border-left: 4px solid var(--gold);
+  background: #fbfaf6;
+}
+.process-six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.process-six div { min-height: 148px; }
+.video-split { grid-template-columns: minmax(0, 1.35fr) minmax(310px, .65fr); }
+.video-picture {
+  min-height: 0 !important;
+  aspect-ratio: 16 / 9;
+  background: #0e171d !important;
+}
+.video-picture video { max-height: none; object-fit: contain; }
+.result-copy { display: flex; flex-direction: column; justify-content: center; }
+.result-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0 !important;
+  list-style: none;
+}
+.result-list li {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.result-list strong,
+.result-list span { display: block; }
+.result-list strong { color: #125477; font-size: 23px; }
+.result-list span { margin-top: 3px; font-size: 13px; line-height: 1.45; }
+.evidence-note {
+  margin-top: 14px;
+  border-left: 4px solid #2b7e84;
+  background: #f4faf9;
+}
+.evidence-note strong { color: #173b47; }
+.board-proof { align-items: center; }
+.pipeline-line {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(19, 35, 43, .06);
+}
+.pipeline-line div {
+  position: relative;
+  min-height: 155px;
+  padding: 20px 16px;
+  border-right: 1px solid var(--line);
+}
+.pipeline-line div:last-child { border-right: 0; }
+.pipeline-line b,
+.pipeline-line strong,
+.pipeline-line span { display: block; }
+.pipeline-line b { color: var(--gold); font-size: 13px; }
+.pipeline-line strong { margin-top: 20px; color: #153341; }
+.pipeline-line span { margin-top: 7px; color: var(--muted); font-size: 14px; }
+@media (max-width: 980px) {
+  .track-grid,
+  .process-six,
+  .pipeline-line,
+  .video-split { grid-template-columns: 1fr; }
+  .pipeline-line div {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .pipeline-line div:last-child { border-bottom: 0; }
+  .pipeline-line strong { margin-top: 5px; }
+}
+@media (max-width: 620px) {
+  .internship-hero h1 {
+    font-size: clamp(32px, 8.8vw, 46px);
+    word-break: normal;
+  }
+  .chapter-heading { gap: 12px; align-items: start; }
+  .chapter-heading > span { width: 44px; height: 44px; }
+  .track-card { padding: 18px; }
+  .result-list { grid-template-columns: 1fr; }
+}
