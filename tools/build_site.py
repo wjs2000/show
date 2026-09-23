@@ -73,7 +73,6 @@ def inject_fundlook_portfolio_nav(dist: Path) -> None:
         <a href="../ai-fitness.html">AI健身</a>
         <a href="../quant-agent.html">量化Agent</a>
         <a href="../railway-stitching.html">铁路拼接</a>
-        <a href="../logistics-llm.html">物流大模型</a>
         <a href="./index.html">FundLook</a>
         <a href="../miniapps.html">小程序合集</a>
       </nav>
@@ -513,29 +512,6 @@ def draw_quant_agent_background(dest_rel: str) -> Path:
     return dest
 
 
-def draw_logistics_background(dest_rel: str) -> Path:
-    dest = slug_path(dest_rel)
-    w, h = 1800, 980
-    im = Image.new("RGB", (w, h), (16, 38, 45))
-    draw = ImageDraw.Draw(im, "RGBA")
-    for y in range(h):
-        alpha = int(120 * y / h)
-        draw.line([(0, y), (w, y)], fill=(24, 82, 87, alpha), width=1)
-    nodes = [(980, 250), (1250, 210), (1460, 350), (1350, 560), (1060, 660), (840, 470), (1560, 680)]
-    for i, a in enumerate(nodes):
-        for b in nodes[i + 1 :]:
-            if math.dist(a, b) < 470:
-                draw.line([a, b], fill=(138, 224, 207, 42), width=2)
-    for idx, (x, y) in enumerate(nodes):
-        r = 18 if idx != 3 else 28
-        draw.ellipse((x - r, y - r, x + r, y + r), fill=(105, 220, 190, 155), outline=(230, 255, 248, 135), width=2)
-    for x, y, ww, hh in [(1080, 785, 150, 80), (1260, 760, 210, 110), (1510, 785, 130, 70)]:
-        draw.rounded_rectangle((x, y, x + ww, y + hh), radius=8, fill=(232, 197, 98, 115), outline=(255, 235, 150, 120), width=2)
-        draw.line([(x + 18, y + 18), (x + ww - 18, y + hh - 18)], fill=(255, 235, 150, 60), width=2)
-    im.save(dest, "JPEG", quality=90, optimize=True, progressive=True)
-    return dest
-
-
 def draw_miniapp_background(dest_rel: str) -> Path:
     dest = slug_path(dest_rel)
     w, h = 1800, 980
@@ -695,7 +671,6 @@ def page_shell(title: str, subtitle: str, body: str, active: str = "") -> str:
         ("ai-fitness.html", "AI健身"),
         ("quant-agent.html", "量化Agent"),
         ("railway-stitching.html", "铁路拼接"),
-        ("logistics-llm.html", "物流大模型"),
         ("fundlook/index.html", "FundLook"),
         ("miniapps.html", "小程序合集"),
     ]
@@ -829,16 +804,6 @@ def write_assets() -> dict[str, str]:
     paths["rail_frame58"] = rel(copy_image(rail_common / "frame_58.jpg", "assets/images/railway/frame-58.jpg", 1000, 700))
     paths["rail_video_gif"] = rel(make_video_gif(rail_show / "无人机视频.mp4", "assets/media/railway/uav-preview.gif", start_sec=2.0, duration=2.8, fps_out=6, width=520, max_frames=18))
     paths["rail_reveal"] = rel(make_reveal_gif(rail_show / "拼接全景图.jpg", "assets/media/railway/panorama-build.gif", width=820))
-
-    logistics = SOURCE_ROOT / "物流大数据垂直大模型" / "portfolio_pack" / "web_showcase_assets" / "assets"
-    for name, key in [
-        ("architecture_diagram.png", "log_arch"),
-        ("dashboard_overview.png", "log_dashboard"),
-        ("route_optimization_demo.png", "log_route"),
-        ("rag_skill_trace.png", "log_rag"),
-    ]:
-        paths[key] = rel(copy_image(logistics / name, f"assets/images/logistics/{key}.jpg", 1400, 900))
-    paths["log_bg"] = rel(draw_logistics_background("assets/images/logistics/logistics-hero.jpg"))
 
     fundlook_cover = REPO / "source_assets" / "fundlook-cover.png"
     paths["fundlook_cover"] = rel(copy_image(fundlook_cover, "assets/images/fundlook/fundlook-cover.jpg", 1500, 980))
@@ -1674,9 +1639,8 @@ def write_index(paths: dict[str, str]) -> None:
         ("03", "AI健身动作识别与评分系统", "摄像头姿态估计、关节角度状态机、动作计数、评分与训练反馈展示。", paths["fitness_strip"], "projects/ai-fitness.html", ["MediaPipe", "OpenCV", "运动健康"]),
         ("04", "事件与情绪分析智能体 / ETF量化辅助系统", "ETF 横截面轮动主引擎结合事件新闻情绪层，用于候选排序、解释和模拟调仓。", paths["quant_sim"], "projects/quant-agent.html", ["ETF轮动", "Agent", "模拟决策"]),
         ("05", "铁路无人机视频全景拼接", "从连续无人机视频帧生成铁路场景全景底图，支撑巡检场景的大视野观察。", paths["rail_final"], "projects/railway-stitching.html", ["SIFT", "RANSAC", "全景拼接"]),
-        ("06", "物流大数据垂直大模型", "RAG 知识库、物流领域工具调用、路径优化、风险预警与自动周报工作台。", paths["log_dashboard"], "projects/logistics-llm.html", ["RAG", "Streamlit", "路径优化"]),
-        ("07", "FundLook / 基金看看", "面向基金用户的认知与分析网站，覆盖基金解释、持仓体检、组合试配、费用工具、限购雷达和每日推送。", paths["fundlook_cover"], "projects/fundlook/index.html", ["React", "基金分析", "产品网站"]),
-        ("08", "微信小程序展示合集", "校园网约车、舒腰健脊、登山协会三个小程序，展示产品流程与前端实现能力。", paths["mini_collage"], "projects/miniapps.html", ["微信小程序", "Vue", "产品原型"]),
+        ("06", "FundLook / 基金看看", "面向基金用户的认知与分析网站，覆盖基金解释、持仓体检、组合试配、费用工具、限购雷达和每日推送。", paths["fundlook_cover"], "projects/fundlook/index.html", ["React", "基金分析", "产品网站"]),
+        ("07", "微信小程序展示合集", "校园网约车、舒腰健脊、登山协会三个小程序，展示产品流程与前端实现能力。", paths["mini_collage"], "projects/miniapps.html", ["微信小程序", "Vue", "产品原型"]),
     ]
     card_html = ""
     for num, title, desc, img, href, tags in cards:
@@ -2141,51 +2105,6 @@ def write_railway(paths: dict[str, str]) -> None:
     (PROJECTS_DIR / "railway-stitching.html").write_text(page_shell("铁路无人机视频全景拼接", "铁路巡检视频全景拼接项目", body, active="rail"), encoding="utf-8")
 
 
-def write_logistics(paths: dict[str, str]) -> None:
-    body = immersive_hero(
-        "物流大数据垂直大模型",
-        "RAG 知识库 · 物流 Skills · 数据工作台",
-        "围绕物流公共服务平台中的智能问答、运价分析、路径优化、风险预警和自动周报场景，构建垂直大模型应用原型。",
-        f"../{paths['log_bg']}",
-        ["RAG", "Streamlit", "路径优化", "风险预警", "自动周报"],
-    )
-    body += section("数据资产", metric_cards([
-        ("模拟运单", "1,766 条"),
-        ("仓储记录", "222 条"),
-        ("节点风险", "296 条"),
-        ("路线网络边", "32 条"),
-    ]))
-    body += section("总体架构", f"""
-      <div class="feature-split">
-        <div class="wide-media">{media_tag(f"../{paths['log_arch']}", "项目总体架构")}</div>
-        <div class="rich-copy">
-          <h3>数据、知识与工具协同</h3>
-          <p>项目将结构化物流数据、业务知识库和可计算 Skills 放在同一工作台中，面向问答、预测、路径、风险和报告任务提供统一入口。</p>
-          <ul>
-            <li>结构化数据用于运价、路线、风险和需求类分析。</li>
-            <li>RAG 知识库承接政策、冷链 SOP、铁路通道和数据治理材料。</li>
-            <li>确定性工具负责路径计算、指标统计和风险判断，再由应用层组织成可读结果。</li>
-          </ul>
-        </div>
-      </div>
-    """)
-    body += section("系统展示", f"""
-      <div class="gallery">
-        {picture_panel(f"../{paths['log_dashboard']}", "运行态势面板")}
-        {picture_panel(f"../{paths['log_route']}", "路径优化演示")}
-        {picture_panel(f"../{paths['log_rag']}", "RAG 与技能调用链")}
-      </div>
-    """)
-    body += section("应用能力", """
-      <div class="text-grid">
-        <article class="text-panel"><h3>智能问答</h3><p>面向物流政策、冷链规范、运输通道和业务流程进行知识检索与问答组织。</p></article>
-        <article class="text-panel"><h3>运营分析</h3><p>基于运单、仓储和节点数据汇总运价、风险、需求和服务质量指标。</p></article>
-        <article class="text-panel"><h3>辅助决策</h3><p>把路径优化、风险预警和自动周报整合为可演示的业务工作台。</p></article>
-      </div>
-    """)
-    (PROJECTS_DIR / "logistics-llm.html").write_text(page_shell("物流大数据垂直大模型", "物流 RAG 与工具调用系统", body, active="logistics"), encoding="utf-8")
-
-
 def phone_cards(paths: dict[str, str], keys: list[str], labels: list[str]) -> str:
     return "".join(
         f'<div class="phone-card">{media_tag(f"../{paths[key]}", labels[i])}<p>{esc(labels[i])}</p></div>'
@@ -2304,7 +2223,6 @@ https://wjs2000.github.io/show/
 - AI健身动作识别与评分系统
 - 事件与情绪分析智能体 / ETF量化辅助系统
 - 铁路无人机视频全景拼接
-- 物流大数据垂直大模型
 - FundLook / 基金看看
 - 微信小程序展示合集
 """
@@ -2321,7 +2239,6 @@ def main() -> None:
     write_fitness(paths)
     write_quant(paths)
     write_railway(paths)
-    write_logistics(paths)
     write_fundlook_site()
     write_miniapps(paths)
     write_readme()
