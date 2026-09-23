@@ -19,15 +19,15 @@
       <div class="hero-inner">
         <p class="kicker">2026.06—2026.09 · 图像算法工程师（实习）</p>
         <h1><span>Ambarella 多目视觉</span><br>与篮球 ePTZ</h1>
-        <p class="lead">从双目、三目相机的标定与全景拼接出发，继续完成篮球电子云台的轨迹规划和自动运镜，并把整条链路从 PC 验证迁移到 Ambarella CV7x 实机。</p>
+        <p class="lead">这段实习主要做了两件事：在 Ambarella CV7x 上把双目、三目相机接起来并输出全景，再用全景视频做篮球电子云台。前面是标定、拼接和推流，后面是检测、裁剪和上板联调。</p>
         <div class="tag-row"><span>Ambarella CV7x</span><span>Multi-camera Stitching</span><span>Camera Calibration</span><span>ePTZ</span><span>YOLO-World</span><span>RTSP</span></div>
       </div>
     </section>
 
     <section class="section internship-intro">
       <div class="section-heading">
-        <h2>一段实习，两条连续主线</h2>
-        <p>先解决“如何看全”，再解决“如何看清”。多目拼接提供完整球场母版，ePTZ 在不转动机械云台的情况下，从全景中选择比赛区域并生成平滑导播画面。</p>
+        <h2>我在实习里做的两个项目</h2>
+        <p>第一个项目是多目相机拼接，先把不同相机的画面对齐、融合并推成一条视频流。第二个项目以这类全景视频为输入，在画面里检测篮球，再裁出一块更适合观看的导播画面。</p>
       </div>
       <div class="metrics">
         <div class="metric"><strong>2 / 3 路</strong><span>双目与三目拼接落地</span></div>
@@ -38,11 +38,11 @@
       <div class="track-grid">
         <article class="track-card">
           <span class="track-no">01</span>
-          <div><p class="eyebrow">Multi-camera Stitching</p><h3>双目 / 三目全景拼接</h3><p>打通相机采集、内外参标定、Warp、画布融合、编码与 RTSP 输出，针对不同工作距离保留可复用配置。</p></div>
+          <div><p class="eyebrow">Multi-camera Stitching</p><h3>双目 / 三目全景拼接</h3><p>负责相机采集、内外参标定、Warp、画布融合、编码和 RTSP 输出，也处理不同拍摄距离下的拼接问题。</p></div>
         </article>
         <article class="track-card">
           <span class="track-no">02</span>
-          <div><p class="eyebrow">Electronic Pan-Tilt-Zoom</p><h3>篮球 ePTZ 电子云台</h3><p>从篮球候选、轨迹修复和未来判断，到镜头规划、电子裁剪与板端输出，完成固定机位的自动运镜闭环。</p></div>
+          <div><p class="eyebrow">Electronic Pan-Tilt-Zoom</p><h3>篮球 ePTZ 电子云台</h3><p>负责篮球候选检测、轨迹修复、换边判断、裁剪窗口规划和视频输出，最后接到 Ambarella 板端做联调。</p></div>
         </article>
       </div>
     </section>
@@ -52,19 +52,19 @@
       <div class="wide-media internship-wide"><img src="../assets/images/internship/stitch-tri-far.jpg" alt="三目远景全景拼接结果" loading="lazy"></div>
       <div class="feature-split section-gap">
         <div class="rich-copy">
-          <h3>不止是调用一个拼接接口</h3>
-          <p>实际链路横跨镜头与 Sensor 组合、内外参标定、统一画布、编码推流和硬件部署。项目适配 IMX577、IMX678 等 Sensor，覆盖 1080P 与 4K 输入。</p>
+          <h3>我具体做了哪些</h3>
+          <p>先根据镜头和 Sensor 组合采集标定图，再生成内参、去畸变映射和相机间的位姿。之后把各路图像放到同一张画布上，处理融合、编码和 RTSP 输出。项目里用到了 IMX577、IMX678 等 Sensor，输入覆盖 1080P 和 4K。</p>
           <ul>
             <li>采集标定图，生成内参、去畸变映射与相机间位姿。</li>
             <li>配置 Source Buffer、Canvas、Overlap Blend、编码流和 RTSP 服务。</li>
             <li>针对重影、接缝错位与近景压缩，调整目标距离、Warp 偏移和运行时参数。</li>
-            <li>沉淀标定、启动、参数调整和故障排查文档，便于不同组合复现。</li>
+            <li>整理标定、启动、参数调整和故障排查步骤，方便换一套相机后重新部署。</li>
           </ul>
         </div>
         <div class="rich-copy challenge-note">
-          <p class="eyebrow">工程边界</p>
-          <h3>远近景不能同时严格对齐</h3>
-          <p>多相机只有一个深度平面能够严格对齐。以远景为目标时，近处物体更容易出现重影或压缩；针对近景重标后，远处又可能错位。项目因此按真实工作距离建立不同配置，并提供运行时微调，而不是宣称所有距离都能完全无缝。</p>
+          <p class="eyebrow">实际遇到的问题</p>
+          <h3>拍摄距离变了，拼接效果也会变</h3>
+          <p>多相机很难让远处和近处同时完全对齐。按远景标定时，近处容易有重影或压缩；按近景重新标定后，远处又可能错位。所以我按使用距离保留了不同配置，并加了运行时微调，没有把它写成“所有距离都无缝”。</p>
         </div>
       </div>
       <div class="gallery three section-gap">
@@ -75,21 +75,21 @@
     </section>
 
     <section class="section">
-      <div class="chapter-heading"><span>02</span><div><p>Basketball ePTZ</p><h2>让固定机位做出自然的跟拍</h2></div></div>
+      <div class="chapter-heading"><span>02</span><div><p>Basketball ePTZ</p><h2>从全景视频里裁出篮球画面</h2></div></div>
       <div class="process process-six">
-        <div><strong>01 · 全景输入</strong><span>始终保留完整球场母版，为后续判断提供上下文。</span></div>
-        <div><strong>02 · 候选检测</strong><span>在抽样帧中生成篮球候选，不让镜头追随单帧结果。</span></div>
-        <div><strong>03 · 轨迹修复</strong><span>过滤固定背景热点，利用前后帧连接短时遮挡缺口。</span></div>
-        <div><strong>04 · 未来判断</strong><span>在可配置前视窗口中判断篮球是否持续进入另一半场。</span></div>
-        <div><strong>05 · 镜头规划</strong><span>满足安全区、持续时间、置信度与候选支持后触发换边。</span></div>
-        <div><strong>06 · 裁剪输出</strong><span>通过受速度、加速度与 Jerk 约束的 S 曲线平滑运镜。</span></div>
+        <div><strong>01 · 读入全景</strong><span>先保留完整球场画面，作为检测和裁剪的原始输入。</span></div>
+        <div><strong>02 · 找篮球</strong><span>按固定频率检测篮球候选，不根据单帧结果马上移动画面。</span></div>
+        <div><strong>03 · 补轨迹</strong><span>过滤固定背景误检，补上篮球短时间被挡住时的轨迹缺口。</span></div>
+        <div><strong>04 · 判断换边</strong><span>看篮球接下来几秒的运动趋势，确认它是否真的去了另一半场。</span></div>
+        <div><strong>05 · 规划窗口</strong><span>满足安全区、持续时间和候选数量等条件后，再移动裁剪窗口。</span></div>
+        <div><strong>06 · 输出视频</strong><span>用速度、加速度和 Jerk 约束裁剪窗口的移动，减少突然反向。</span></div>
       </div>
     </section>
 
     <section class="section">
       <div class="section-heading">
-        <h2>PC 黄金实验</h2>
-        <p>先在一段固定的 3840×960 全景视频上冻结配置，用人工标注点核对轨迹与最终 Crop。这里的数字用于说明该次实验，不外推为所有视频或板端场景的通用准确率。</p>
+        <h2>先在 PC 上把算法跑通</h2>
+        <p>我先用一段固定的 3840×960 全景视频做实验，固定检测频率和前视时间，再用人工标注点检查轨迹和最终裁剪结果。下面的数字只对应这段视频和这套配置。</p>
       </div>
       <div class="feature-split video-split">
         <article class="picture-panel"><div class="picture video-picture"><video controls muted playsinline preload="metadata" poster="../assets/images/internship/eptz-review.jpg"><source src="../assets/media/internship/eptz-pc-preview.mp4" type="video/mp4"></video></div><div class="picture-copy"><h3>算法审核画面</h3><p>上半部分保留全景、轨迹与 Crop 规划信息，下半部分为最终电子裁剪画面。</p></div></article>
@@ -111,15 +111,15 @@
 
     <section class="section">
       <div class="section-heading">
-        <h2>从 PC 到 Ambarella 实机</h2>
-        <p>算法验证之后，将 YOLO-World-S、双路单目切块检测、单目到全景坐标映射、电子裁剪、编码与 RTSP 导播输出接到真实硬件链路中。</p>
+        <h2>再接到 Ambarella 板子上</h2>
+        <p>PC 版本跑通后，我继续处理 YOLO-World-S 板端适配、双路单目切块检测、单目坐标到全景坐标的转换、电子裁剪、编码和 RTSP 输出。</p>
       </div>
       <div class="feature-split video-split board-proof">
         <article class="picture-panel"><div class="picture video-picture"><video controls muted playsinline preload="metadata" poster="../assets/images/internship/eptz-board.jpg"><source src="../assets/media/internship/eptz-board-preview.mp4" type="video/mp4"></video></div><div class="picture-copy"><h3>真实篮球运镜</h3><p>轻量预览记录实机环境下的篮球识别、自动换边和电子裁剪效果。</p></div></article>
         <div class="rich-copy">
           <p class="eyebrow">Board integration</p>
           <h3>板端结果用实测视频证明</h3>
-          <p>实机部分完成了整条链路联调，但没有把 PC 离线实验的 381 / 381 直接当作板端通用指标。页面分别呈现量化实验和现场视频，避免混淆两种证据。</p>
+          <p>板端最后完成了现场联调。PC 实验里的 381 / 381 只是固定视频上的裁剪覆盖结果，不能直接当成板端或所有场景的指标，所以这里用实机视频单独展示。</p>
           <ul>
             <li>YOLO-World-S 板端适配</li>
             <li>双路单目切块检测</li>
@@ -132,8 +132,8 @@
 
     <section class="section">
       <div class="section-heading">
-        <h2>完整工程链路</h2>
-        <p>这段实习的价值不在一个孤立模型，而在于把相机、几何、时序算法和嵌入式视频链路接成可运行系统。</p>
+        <h2>最后交付的内容</h2>
+        <p>这段实习最后留下的是一套能重新部署和继续调试的东西：相机标定和拼接配置、篮球 ePTZ 的 PC 实验结果，以及已经在 Ambarella 板端跑过的检测、裁剪和 RTSP 链路。</p>
       </div>
       <div class="pipeline-line" aria-label="从相机输入到导播输出的完整链路">
         <div><b>01</b><strong>相机与标定</strong><span>Sensor、镜头、内外参</span></div>
@@ -144,9 +144,9 @@
         <div><b>06</b><strong>板端输出</strong><span>编码、RTSP、实机验证</span></div>
       </div>
       <div class="text-grid section-gap">
-        <article class="text-panel"><h3>我负责的算法工作</h3><p>多相机标定与拼接参数生成；篮球候选聚合、轨迹修复、未来判断和受约束的镜头规划。</p></article>
-        <article class="text-panel"><h3>我负责的工程工作</h3><p>PC 实验链路、黄金配置对比、Ambarella 板端适配、坐标映射、电子裁剪和 RTSP 联调。</p></article>
-        <article class="text-panel"><h3>我沉淀的交付</h3><p>标定与启动流程、参数配置、实验记录、故障排查方法，以及可复用的双目与三目部署资料。</p></article>
+        <article class="text-panel"><h3>算法部分</h3><p>多相机标定和拼接参数生成；篮球候选聚合、轨迹修复、换边判断和裁剪窗口规划。</p></article>
+        <article class="text-panel"><h3>工程部分</h3><p>PC 实验、不同配置对比、Ambarella 板端适配、坐标转换、电子裁剪和 RTSP 联调。</p></article>
+        <article class="text-panel"><h3>文档和配置</h3><p>整理标定与启动步骤、参数文件、实验记录和排错方法，保留室内近景与室外远景的配置。</p></article>
       </div>
     </section>
   </main>
